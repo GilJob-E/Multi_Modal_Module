@@ -2,100 +2,38 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## What this is
+## 지금 상태 (중요)
 
-`gje` (GilJob) is a workspace for a real-time multimodal interview system. The single shipped deliverable is `local-infer/`: a **low-latency, video-native local inference gateway** that fronts a vLLM server running `google/gemma-4-31B-it` (online fp8, TP=2 on 2×4090). It is a FastAPI app exposing OpenAI-compatible SSE streaming. Everything else (`sglang/`, `video-test/`) is experiment/benchmark history; `.sisyphus/` and `.hermes/` hold planning and evidence records.
+이 워크스페이스는 2026-05-24에 **재정의 후 깨끗하게 재시작**되었다. 이전 `local-infer` 구현 전체(코드·테스트·문서·증거)는 git 베이스라인 커밋 `f80e447`에 보존돼 있다. 작업트리에는 프레임 문서와 fixture만 있고 코드는 아직 없다. 재사용 가능한 이전 코드는 `docs/DECISIONS.md`의 표를 보고 `git checkout f80e447 -- <path>`로 의도적으로 되살린다.
 
-Most documentation and code comments are in Korean. This is intentional — match the surrounding language when editing docs.
+문서는 한국어. 편집 시 같은 언어를 유지한다.
 
-## Commands
+## 무엇을 만드는가
 
-All commands run from `local-infer/`. The project uses `uv` and requires `PYTHONPATH=src`.
+로컬 LLM(vLLM + Gemma 4)으로 면접 답변을 **언어·청각·시각 종합 평가**해 풍부한 피드백을 **턴 단위로 즉시** 내는 추론 모듈. 핵심 방법론은 **periodic prefill**(발화 중 선행 prefill → 턴 종료 시 즉시 generate). 자세한 목적·기준은 `README.md`.
 
-```bash
-# Full test suite
-PYTHONPATH=src uv run --with pytest --with httpx pytest tests -q
+## 먼저 읽을 것
 
-# Single test file / single test
-PYTHONPATH=src uv run --with pytest --with httpx pytest tests/test_native_app.py -q
-PYTHONPATH=src uv run --with pytest --with httpx pytest tests/test_native_app.py::<test_name> -q
+- `README.md` — 프로젝트 목적·성공 기준·디렉터리
+- `docs/PLAN.md` — 실행 계획 (Phase 1 검증 스파이크부터)
+- `docs/RESEARCH.md` — Gemma 4 바리언트 능력, native 오디오 핵심 발견과 출처
+- `docs/DECISIONS.md` — 엔진/모델/벤치 결정, 재사용 코드 포인터
 
-# Native-path targeted tests (the refactor's Definition of Done set)
-PYTHONPATH=src uv run --with pytest --with httpx pytest \
-  tests/test_native_media_store.py tests/test_native_audio.py \
-  tests/test_native_payloads.py tests/test_native_app.py \
-  tests/test_native_forbidden_paths.py -q
+## 반드시 기억할 사실 (재발 방지)
 
-# Run the server (needs a reachable vLLM at VLLM_BASE_URL)
-PYTHONPATH=src VLLM_BASE_URL=http://localhost:8000 uvicorn local_infer.app:app --host 0.0.0.0 --port 8080
+- **오디오는 Gemma 4 E2B/E4B에만 있다.** 31B·26B-A4B는 오디오 입력 불가. 들으려면 E2B/E4B.
+- **이전의 audio "no-go"는 모델 천장이 아니라 payload 버그였다.** vLLM Gemma 4 오디오 콘텐츠 타입은 **`audio_url`**(이전 `input_audio`는 틀림). `vllm[audio]` extras 필요. 오디오는 16kHz mono, 최대 30초. 이 오해를 다시 "능력 한계"로 결론내지 말 것.
+- **저수준 feature extraction으로 빠지지 말 것.** 목표는 모델이 직접 이해하는 native 평가다.
 
-# Structural smoke (no GPU needed; uses an in-process fake vLLM). Run from repo root.
-python3 local-infer/tools/smoke_vid0033_native_stream.py \
-  --source /home/kio/workspace/gje/vid_0033.mp4 \
-  --out .sisyphus/evidence/native-streaming-vid0033-smoke.json \
-  --in-process-fake-vllm --session-id native-smoke-vid0033
-```
+## GPU 위생 규칙 (필수)
 
-Tests use a fake vLLM and do not need a GPU. The `tools/probe_*.py` scripts do hit a real vLLM/GPU.
-
-### GPU operating rule (non-negotiable)
-
-When the model is not in use, stop the container and confirm VRAM is released — both GPUs should read single-digit MiB, 0% util.
+모델 미사용 시 컨테이너를 stop하고 VRAM 해제를 확인한다.
 
 ```bash
-docker stop vllm-gemma4
+docker stop <vllm-container>
 nvidia-smi --query-gpu=index,memory.used,utilization.gpu --format=csv,noheader
 ```
 
-## Architecture
+## fixture
 
-The gateway keeps **three strictly separate request flows**. Conflating them is the most common mistake — see the proof-gate invariant below.
-
-1. **Frame-only visual baseline** (original low-latency path)
-   - `POST /v1/sessions/{id}/frames` pushes JPEG frames into a per-session bounded buffer (`FrameStore`).
-   - `POST /v1/sessions/{id}/generate` sends the most recent N frames as `image_url[]` to vLLM and streams SSE back.
-   - This is a *visual* baseline for the 31B model, **not** audio understanding.
-
-2. **Native user-override path** (added MP4+audio path)
-   - `POST /v1/native/sessions/{id}/windows` stores a rolling base64 MP4 window file (`NativeMediaStore`).
-   - `POST /v1/native/sessions/{id}/generate` extracts WAV from the *same* stored window (`NativeAudioExtractor`) and sends a `video_url` + `input_audio` (+ text) payload — **never `image_url[]`**.
-   - The audio is same-window transport, not ASR/VAD/transcript.
-
-3. **Degraded local audio-analysis fallback**
-   - `POST /v1/sessions/{id}/audio` stores WAV chunks (`AudioStore`).
-   - `POST /v1/sessions/{id}/generate-av-fallback` does deterministic local cue analysis + frame presence and emits `native_success=false`, `fallback_mode=degraded_local_audio_analysis`. This is **not** native inference.
-
-### Source map (`src/local_infer/`)
-
-- `app.py` — FastAPI app + all endpoints + SSE event generation (`ttft`/`token`/`final`)
-- `frame_store.py` / `audio_store.py` — per-session bounded in-memory buffers
-- `payloads.py` — builds `image_url[]` chat payload (frame path)
-- `native_media_store.py` — bounded MP4 window file store; produces `video_url` from `LOCAL_INFER_NATIVE_MEDIA_URL_PREFIX`
-- `native_audio.py` — same-window WAV `input_audio` extraction
-- `native_payloads.py` — builds `video_url` + `input_audio` + text payload (native path)
-- `audio_analysis.py` — deterministic WAV cue analysis (fallback path only)
-- `vllm_client.py` — calls vLLM `/v1/models` and `/v1/chat/completions` (stream)
-- `vllm_stream.py` — extracts content deltas from vLLM's SSE byte stream
-
-### Environment variables
-
-- `VLLM_BASE_URL` (default `http://localhost:8000`) — upstream vLLM
-- `LOCAL_INFER_MODEL` (default `google/gemma-4-31B-it`)
-- `LOCAL_INFER_NATIVE_MEDIA_DIR` (default `/tmp/gje-local-infer-native-media`) — where MP4 windows are written
-- `LOCAL_INFER_NATIVE_MEDIA_URL_PREFIX` (default `file://{NATIVE_MEDIA_DIR}`) — the prefix used to build `video_url`. When vLLM runs in Docker, the media dir must be mounted into the container at a path matching this prefix, or vLLM cannot read the file.
-
-## The proof-gate invariant (read before changing docs/tests/claims)
-
-This project maintains an audit trail in `.sisyphus/evidence/`. The canonical state is **native audio is NO-GO**, and the documentation deliberately preserves that. Do not "fix" docs to claim success.
-
-- Canonical gate: `.sisyphus/evidence/vid0033-native-proof-gate.json` → `gemma4_capability_no_go`, `streaming_refactor_allowed=false`. The fixed real fixture is `/home/kio/workspace/gje/vid_0033.mp4`. **Never flip this to pass.**
-- Route lock: `.sisyphus/evidence/task-6-route-decision.json` → `selected_route=native-no-go`, `fallback_enabled=true`. Gemma4 E4B/E2B and Qwen2.5-Omni native audio probes both failed (Tasks 4–5); Tasks 7–8 were blocked/skipped, so there is no `/generate-av-native` endpoint.
-- The native MP4 path (flow 2) exists only because of an explicit **user override**: `.sisyphus/evidence/native-streaming-user-override-go.json` → `user_override_capability_go_for_refactor`. This authorizes the engineering refactor; it does **not** retroactively pass the proof gate or claim native audio understanding.
-
-When editing any doc (README.md, INFERENCE_PIPELINE.md, local-infer/README.md, local-infer/docs/*), hold these phrasings true: the fallback path is not native success, fallback paths are not native proof, and `audio_analysis` is not native media understanding. Keep the no-go evidence visible rather than deleting it.
-
-## Further reading
-
-- `INFERENCE_PIPELINE.md` — top-level index of results and file locations
-- `local-infer/docs/{ARCHITECTURE,API_CONTRACT,RUNBOOK,DECISIONS}.md`
-- `sglang/EXPERIMENT_LOG.md` — why SGLang was rejected (vLLM was adopted)
+- `vid_0033.mp4` — 실제 면접 영상. Phase 1 스파이크 fixture. gitignore라 git에 없으니 **삭제 금지**(소실 시 복구 불가). quiet tail이 약 48–50s에 있음.

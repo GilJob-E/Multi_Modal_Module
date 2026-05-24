@@ -1,6 +1,0 @@
-Local-only verification: no cloud APIs, no hosted transcription, no manual listening.
-Command used: env PYTHONPATH=src uv run --with pytest --with httpx pytest tests -q
-Exit code: 0
-stdout:
-.........................................................                [100%]
-57 passed in 0.31s

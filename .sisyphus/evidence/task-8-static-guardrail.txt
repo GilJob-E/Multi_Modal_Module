@@ -1,3 +1,0 @@
-static native guardrail assertions passed
-
-EXIT_STATUS=0

@@ -1,9 +1,0 @@
-{
-  "model_id": "google/gemma-4-31B-it",
-  "status": "not_accepted_as_audio_native_success",
-  "reason": "Current 31B video_url behavior is preserved only as a visual baseline; MP4 upload success is not audio understanding.",
-  "local_only": true,
-  "no_cloud_apis": true,
-  "no_hosted_transcription": true,
-  "no_manual_listening": true
-}

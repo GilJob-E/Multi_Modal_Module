@@ -1,75 +1,52 @@
-# gje
+# gje — 실시간 native 멀티모달 면접 평가 모듈
 
-실시간 멀티모달 면접 시스템 프로젝트를 위한 작업 공간입니다.
+로컬 LLM(vLLM + Gemma 4)으로 면접 답변을 **언어(verbal)·청각(vocal)·시각(visual) 종합**으로 평가하는 풍부한 피드백을, **턴(답변) 단위로 즉시** 생성하는 독립 추론 모듈.
 
-현재 이 폴더의 핵심 산출물은 **로컬 Gemma4/vLLM 기반 최소지연 video-native 추론 파이프라인 모듈**입니다.
+> 이 워크스페이스는 2026-05-24 재정의 후 깨끗하게 재시작되었다. 이전 구현 전체는 git 베이스라인 커밋 `f80e447`에 보존돼 있어 언제든 복구 가능하다.
 
-## 현재 Gemma4 native proof gate와 user override
+## 목적
 
-최종 canonical proof gate는 여전히 `.sisyphus/evidence/vid0033-native-proof-gate.json`입니다. 이 파일의 상태는 `gemma4_capability_no_go`이며 `streaming_refactor_allowed=false`입니다. 이 기록은 통과로 바꾸지 않습니다.
+로컬 LLM으로 **nativeness와 latency를 동시에 최대화**한다. 모델이 시각·청각을 직접 이해해(저수준 feature dump 지양) 아래 수준의 평가를 실시간으로 낸다:
 
-새 refactor는 별도 evidence인 `.sisyphus/evidence/native-streaming-user-override-go.json`의 `user_override_capability_go_for_refactor` 결정으로 진행합니다. 사용자는 accepted E4B native media 결과를 engineering refactor에 충분한 capability signal로 판단했습니다. 따라서 prior no-go history는 보존하고, 구현 권한만 user override로 분리합니다.
+- **언어적(Verbal)**: 답변 내용의 논리·구조·구체성·키워드
+- **청각적(Vocal)**: 톤·억양 단조로움·발음·말 속도·pause·자신감
+- **시각적(Visual)**: 시선 처리·표정·제스처·화면 구도·조명
 
-기존 `/v1/sessions/{id}/frames`와 `/v1/sessions/{id}/generate` 경로는 계속 존재하지만 native streaming refactor path가 아닙니다. `/v1/sessions/{id}/audio`와 `/v1/sessions/{id}/generate-av-fallback`은 degraded fallback 경로이며 fallback paths are not native success. `audio_analysis` is not native proof.
+핵심 방법론은 **periodic prefill**: 발화 중 들어오는 프레임/오디오를 미리 prefill해, 턴 종료(VAD/end-of-turn) 시점에 첫 토큰 지연을 최소화한다.
 
-## 현재 audio understanding 상태
+비목표: TTS, 프론트엔드, 터널/노출, GilJob 통합 코드, Gemini Live.
 
-현재 문서의 기준 상태는 Task 6 route lock이다. `.sisyphus/evidence/task-6-route-decision.json`은 `selected_route=native-no-go`, `native_route_status=no-go`, `fallback_enabled=true`를 기록한다. 따라서 현재 검증된 층은 다음 셋으로 나눈다.
+## 성공 기준
 
-- Frame-only visual baseline: `google/gemma-4-31B-it` 경로는 `/v1/sessions/{id}/frames`와 `/v1/sessions/{id}/generate`에서 최근 JPEG `image_url[]`만 쓰는 visual baseline이다. MP4 `video_url` 안의 AAC 동작이나 frame-only 결과를 native audio understanding으로 부르지 않는다.
-- Native audio route attempts: Task 4 Gemma4 E4B/E2B explicit `input_audio` WAV probes failed, and Task 5 Qwen did not pass all required probes. Qwen `cross_modal_event` passing alone is not a route pass. Task 6 selected `native-no-go`.
-- Degraded local fallback: Task 10 documents `/v1/sessions/{session_id}/audio` and `/v1/sessions/{session_id}/generate-av-fallback` as deterministic local WAV cue analysis plus frame presence. It emits `native_success=false` and is not native ASR, transcript ASR, or native multimodal inference.
+1. 출력 품질이 위 verbal/vocal/visual 종합 평가 수준에 도달.
+2. 턴 종료 시 warm TTFT < 0.5s (periodic prefill로 달성).
+3. 청각·시각을 가능한 한 모델이 native로 이해.
+4. vLLM을 숨긴 깔끔한 단일 인터페이스, 모델/엔진 교체에도 인터페이스 불변.
 
-Task 7 native-success implementation was blocked and skipped, so no `/generate-av-native` endpoint was added. Task 8 native integration tests were blocked and skipped because no selected native route exists. The separate `/v1/native/sessions/{session_id}/windows` and `/v1/native/sessions/{session_id}/generate` endpoints remain a user-override engineering path for native media payload shape, not proof that the legacy audio-understanding native route passed.
+## 현재 상태
 
-Current no-go and fallback evidence stays visible: `.sisyphus/evidence/task-4-gemma4-native-probe.json`, `.sisyphus/evidence/task-4-gemma4-no-go.md`, `.sisyphus/evidence/task-5-qwen-native-probe.json`, `.sisyphus/evidence/task-5-qwen-no-go.md`, `.sisyphus/evidence/task-6-route-decision.json`, `.sisyphus/evidence/task-6-route-decision.md`, `.sisyphus/evidence/task-7-blocked.md`, `.sisyphus/evidence/task-8-blocked.md`, and `.sisyphus/evidence/task-10-asr-fallback.md`.
-
-## 빠른 진입점
-
-- 전체 인덱스: `INFERENCE_PIPELINE.md`
-- 채택 모듈: `local-infer/`
-- Native API 계약: `local-infer/docs/API_CONTRACT.md`
-- Native runbook: `local-infer/docs/RUNBOOK.md`
-- Phase 0 벤치: `local-infer/experiments/phase0/README.md`
-- SGLang No-Go 기록: `sglang/EXPERIMENT_LOG.md`
-- 원본 벤치/샘플: `video-test/`
-
-## 추론 엔진 결정
-
-실시간 추론 엔진으로 **vLLM 채택** (2026-05-20). SGLang 이전은 검토했으나 No-Go.
-
-- vLLM: `google/gemma-4-31B-it` 원본 + online fp8 + TP=2
-- SGLang fp8: 2×4090 24GB에서 메모리/실용 성능 한계
-- SGLang AWQ: Gemma4 vision tower compressed-tensors 지원 미완성으로 기동 실패
-
-## 입력 인터페이스 결정
-
-현재 구현은 두 입력 경로를 함께 둡니다.
-
-- 기존 low-latency frame path: `/v1/sessions/{id}/frames`로 JPEG를 쌓고 `/v1/sessions/{id}/generate`가 최근 `image_url[]` 프레임을 보냅니다.
-- User override native path: `/v1/native/sessions/{id}/windows`로 rolling MP4 window를 올리고 `/v1/native/sessions/{id}/generate`가 `video_url`과 같은 window에서 뽑은 `input_audio` WAV를 보냅니다. 이 native path는 `image_url[]`를 쓰지 않습니다.
+재시작 직후. 다음 단계는 **Phase 1 검증 스파이크**(`docs/PLAN.md`) — E4B native AV 동작·품질·prosody를 실측해 아키텍처(단일 E4B vs 2-스테이지)를 확정한다.
 
 ## 디렉터리
 
 ```text
-local-infer/    # FastAPI local inference module
-sglang/         # SGLang 실험/No-Go 기록
-video-test/     # 기존 vLLM/Gemma4 벤치 스크립트와 샘플
-.hermes/plans/  # 계획 문서
+gje/
+├── README.md          # 이 문서 (프로젝트 프레임)
+├── CLAUDE.md          # Claude Code용 작업 가이드
+├── docs/
+│   ├── PLAN.md        # 재정의 실행 계획 (Phase 1~4)
+│   ├── RESEARCH.md    # Gemma 4 바리언트·native 오디오 리서치 결론 + 출처
+│   └── DECISIONS.md   # 엔진/모델/벤치 결정과 근거, 재사용 코드 포인터
+├── vid_0033.mp4       # 실제 면접 fixture (gitignore, 디스크에만 존재)
+└── 졸업작품2_중간보고_3분반_1조 (2).docx   # 중간보고서 (레퍼런스)
 ```
 
-## 외부 의존 경로
+## 외부 의존
 
-- `~/hf_cache/`: Gemma 4 모델 캐시 및 vLLM 컨테이너 볼륨 마운트 대상.
-- Docker 컨테이너: `vllm-gemma4`
-- Native runtime media dir: `LOCAL_INFER_NATIVE_MEDIA_DIR`, 기본값 `/tmp/gje-local-infer-native-media`
-- Native media URL prefix: `LOCAL_INFER_NATIVE_MEDIA_URL_PREFIX`, 기본값 `file://{LOCAL_INFER_NATIVE_MEDIA_DIR}`
-
-## GPU 운영 원칙
-
-모델을 안 쓸 때는 컨테이너를 stop하고 VRAM 해제를 확인합니다.
-
-```bash
-docker stop vllm-gemma4
-nvidia-smi --query-gpu=index,memory.used,utilization.gpu --format=csv,noheader
-```
+- vLLM 컨테이너(OpenAI 호환 API, 포트 8000), 모델 캐시 `~/hf_cache/`
+- 하드웨어: RTX 4090 × 2 (24GB × 2)
+- **GPU 위생 규칙**: 모델 미사용 시 컨테이너 stop + VRAM 해제 확인
+  ```bash
+  docker stop <vllm-container>
+  nvidia-smi --query-gpu=index,memory.used,utilization.gpu --format=csv,noheader
+  ```

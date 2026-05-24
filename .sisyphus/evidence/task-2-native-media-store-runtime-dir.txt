@@ -1,8 +1,0 @@
-Command: cd /home/kio/workspace/gje/local-infer && PYTHONPATH=src uv run --with pytest --with httpx pytest tests/test_native_media_store.py -q -k runtime_dir
-Exit status: 0
-
-STDOUT:
-.                                                                        [100%]
-1 passed, 14 deselected in 0.01s
-
-STDERR:

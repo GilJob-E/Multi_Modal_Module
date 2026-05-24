@@ -1,7 +1,0 @@
-Command: cd /home/kio/workspace/gje/local-infer && env PYTHONPATH=src uv run --with pytest --with httpx pytest tests -q
-Generated: 2026-05-22T06:17:28Z
-
-.........................................................                [100%]
-57 passed in 0.30s
-
-Exit code: 0

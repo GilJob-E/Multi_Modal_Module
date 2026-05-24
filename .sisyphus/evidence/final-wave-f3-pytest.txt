@@ -1,5 +1,0 @@
-$ env PYTHONPATH=src uv run --with pytest --with httpx pytest tests -q
-.........................................................                [100%]
-57 passed in 0.34s
-
-exit_status=0
