@@ -12,31 +12,37 @@
 - **청각적(Vocal)**: 톤·억양 단조로움·발음·말 속도·pause·자신감
 - **시각적(Visual)**: 시선 처리·표정·제스처·화면 구도·조명
 
-핵심 방법론은 **periodic prefill**: 발화 중 들어오는 프레임/오디오를 미리 prefill해, 턴 종료(VAD/end-of-turn) 시점에 첫 토큰 지연을 최소화한다.
+**처리 전략 (모달리티별, 2026-05-24 실측으로 재정의).** 한때 간판으로 삼았던 *periodic prefill*은 ≤30s·E4B에서 **불필요**함이 드러났다 — 오디오 인코더가 클립을 소수 토큰으로 압축해 **cold prefill이 이미 싸기** 때문(신선 콘텐츠 30s end-to-end <0.2s). 대신 모달리티 특성에 맞춘다:
+
+- **청각/언어 (audio)**: ≤30s 윈도우를 모델에 통째로 준다. latency는 모델 속성으로 충족되고, 유일한 비용은 부팅 1회성 워밍업(기동 시 더미 요청으로 선warm).
+- **시각 (visual)**: 다중 프레임을 한 프롬프트에 넣으면 시간 binding이 깨지므로(환각), **프레임별 단일 분석 + 타임라인 집계**로 푼다. 프레임은 턴 내내 도착하니 발화 중 분산 처리(프레임당 ~60ms, 병렬) → 턴 종료엔 집계만. **incremental 처리가 실효 있는 모달리티는 비전이다.**
 
 비목표: TTS, 프론트엔드, 터널/노출, GilJob 통합 코드, Gemini Live.
 
 ## 성공 기준
 
 1. 출력 품질이 위 verbal/vocal/visual 종합 평가 수준에 도달.
-2. 턴 종료 시 warm TTFT < 0.5s (periodic prefill로 달성).
+2. 턴 종료 시 first-token < 0.5s. 오디오는 cold로 이미 충족(30s ~0.12s), 시각은 프레임별 처리를 발화 중 분산해 충족.
 3. 청각·시각을 가능한 한 모델이 native로 이해.
 4. vLLM을 숨긴 깔끔한 단일 인터페이스, 모델/엔진 교체에도 인터페이스 불변.
 
 ## 현재 상태
 
-**Phase 1 검증 스파이크 완료(2026-05-24) → 아키텍처 (1) 단일 E4B native AV 확정.**
-`audio_url`(data URL) 규격 + `vllm[audio]` 파생 이미지로 E4B가 native AV를 HTTP 200
-처리, prosody 묘사·평가 깊이·prefix 캐시 재사용 모두 실측 통과(증거
-`.sisyphus/evidence/spike-e4b-native-av.json`). 이전 audio "no-go"는 모델 천장이
-아니라 payload 버그였음 확인. 검증된 전송 = 샘플 프레임(`image_url`) + `audio_url`.
+**아키텍처 (1) 단일 E4B native AV 확정(Phase 1)** + **처리 전략 실측 확정(cold kill-test +
+시각 시간축 스파이크, 2026-05-24).**
 
-**Phase 3**(턴 파이프라인 + periodic prefill)에서 평가자 인터페이스·품질·nativeness는
-구현·확인됐으나, **간판 방법론인 periodic prefill의 latency 실효는 미입증이다.** 최초
-"31.5배 단축"은 하니스가 최종 오디오를 미리 쥔 best-case 측정이었고(정정됨), 라이브에선
-최종 오디오가 턴 종료 시점에야 확정돼 미리 데울 수 없다. 다음 단계는 이 갭을 cold
-조건에서 검증하는 **cold kill-test 스파이크**(`docs/PLAN.md` "## 남은 갭"). Phase 2는
-폐지·흡수, Phase 4는 백지화됨.
+- **청각/언어**: `audio_url`(data URL) + `vllm[audio]` 파생 이미지로 E4B가 native AV를
+  HTTP 200 처리, prosody 묘사·평가 깊이 충분. **cold prefill이 싸다** — 신선 콘텐츠
+  30s end-to-end <0.2s, latency 목표를 periodic prefill 없이 충족(증거
+  `spike-cold-prefill.json`). 최초 "31.5배"는 best-case 오측이라 철회됨.
+- **시각**: 단일 프레임 카운팅은 정확하나, **다중 프레임을 한 프롬프트에 넣으면 시간
+  binding이 깨진다**(환각). → **프레임별+집계** 아키텍처가 실제 제스처를 추적하며
+  프레임당 ~60ms·병렬로 싸다(증거 `spike-visual-fingers.json`,
+  `spike-visual-temporal-v2.json`). 잔여 천장 = 인접값 카운팅 fidelity(질적 평가엔 허용).
+- Phase 2 폐지·흡수, Phase 3 부분완료(인터페이스·품질·nativeness), Phase 4 백지화.
+
+**다음**: 시각 시간축 트랙(프레임별+집계, smart 집계기)을 `native_eval`에 통합하고 audio
+평가와 합치는 턴 파이프라인 재설계. 상세 `docs/PLAN.md`.
 
 ## 디렉터리
 

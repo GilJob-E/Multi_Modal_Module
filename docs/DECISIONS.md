@@ -33,8 +33,27 @@
 스파이크 실측으로 D3의 분기를 (1)로 확정. 근거(증거 `.sisyphus/evidence/spike-e4b-native-av.json`):
 - `audio_url`(data URL) 규격 + `vllm[audio]` 파생 이미지로 E4B가 native AV를 HTTP 200 처리 — 이전 "no-go"는 모델 천장이 아니라 **`input_audio` payload + extras 누락** 버그였음 실측 확인.
 - E4B가 prosody(음량·속도·pause·억양)를 **전사가 아니라 실제 묘사**, verbal/vocal 평가 깊이 충분 → 2-스테이지 융합 불필요.
-- warm TTFT 0.03–0.38s. 동일 오디오 prefix가 요청 간 캐시 재사용됨(2번째 호출 0.03s) → **periodic prefill 실효성 직접 입증**.
+- warm TTFT 0.03–0.38s. 동일 오디오 prefix가 요청 간 캐시 재사용됨(2번째 호출 0.03s). ⚠️ **정정(D6)**: 당시 이를 "periodic prefill 실효 입증"으로 적었으나 그건 identical-prefix 재사용일 뿐 — 라이브 cold 조건과 무관. 실제로는 D6에서 periodic prefill 자체가 불필요로 판명.
 - 서빙: 파생 이미지 `vllm-gemma4-audio:local`(nightly + librosa/soundfile), E4B 단일 GPU ~22.7GB, `--limit-mm-per-prompt '{"image":4,"audio":1}' --enable-prefix-caching`.
+
+## D6. periodic prefill 폐기 — 오디오 cold가 이미 싸다 (확정, cold kill-test 2026-05-24)
+
+간판 방법론이던 periodic prefill은 ≤30s·E4B에서 **불필요**. 근거(증거 `.sisyphus/evidence/spike-cold-prefill.json`):
+- 매번 unique=cache-miss인 오디오로도 end-of-turn TTFT가 길이 비례 10s 0.08s / 20s 0.11s / **30s 0.12s** — Gemma 오디오 인코더가 클립을 소수 토큰으로 압축하므로 cold prefill이 싸다.
+- 신선 `vid_0001`로 서로 다른 30s 클립 6연발: 턴1(부팅) e2e 1.19s, **턴2~6(전부 cold) e2e 0.17~0.20s**(ffmpeg+base64 추출 ~70ms 포함). per-turn warm 전제 없음 — Phase 3 "31.5배"(최종 오디오 미리 쥔 best-case) 철회.
+- 유일한 비싼 턴 = 부팅 첫 호출 1.19s(CUDA 그래프 1회 컴파일) → 기동 더미 요청으로 선warm.
+- 레버 A(인코더 청크 prefix-stable)=미스지만 절대비용 0.1s대라 무의미. 레버 B(tail prefill 55~72ms ≪ VAD hangover 500ms)는 숨길 게 없을 만큼 여유.
+- **결론**: 오디오 latency는 모델 속성으로 충족. 별도 prefill 기법 대신 ≤30s 윈도우를 통째로 보낸다.
+
+## D7. 시각 시간축 = 프레임별 분석 + 집계 (확정, 시각 스파이크 2026-05-24)
+
+다중 프레임을 한 프롬프트에 덤프하는 현재 `native_eval`식은 **미세 시간축 과제에 부적합**. 근거(증거 `spike-visual-fingers.json`, `spike-visual-temporal-v2.json`; GT 손가락 5 2 10 9 4 2 1 4 5 10):
+- **단일 프레임 카운팅은 320x240에서도 정확**(4/4: 0,0,10"양손5개씩",2"V자").
+- 그러나 10~16장을 한 프롬프트에 넣으면 `0,1,2,3,4,5` 식 **환각 + 출력 길이 불일치 — 다중이미지 시간 binding이 깨짐**. 거시적 시각 단서(태도·자세)엔 OK, 미세 시퀀스엔 불가.
+- **프레임별 단일호출 + 타임라인 집계**는 실제 제스처를 추적(선명한 것 ~6/10 회복).
+- latency: 프레임당 55~72ms, 73장 병렬 0.50s. **프레임은 턴 내내 도착 → 발화 중 분산처리, end-of-turn은 집계만(~0)** = incremental 처리의 진짜 자리(오디오와 대비, D6).
+- 잔여 천장 = **인접값 카운팅 fidelity**(4 vs 5 엄지, 9 vs 10). 선명한 프레임에서도 나는 모델/해상도 한계 — 정확 카운트엔 블로커, 질적 body-language엔 허용. 정확 카운트가 필요하면 고해상도/전용 손모델(=모델 교체급, 범위 밖).
+- **결론**: 시각 트랙은 프레임 덤프 대신 프레임별+집계로 설계. 집계기는 (t,count/caption) 타임라인을 LLM에 줘 질적 시간동역학을 묘사하는 방향(미구현, 다음 작업).
 
 ## 신규 코드 (Phase 1 산출물)
 
@@ -42,7 +61,10 @@
 |---|---|
 | `src/local_infer/native_audio.py` | 베이스라인 복구 + `to_content_part` audio_url 교정 |
 | `tools/spike_e4b_native_av.py` | 스파이크 probe (스모크 + 풀 배터리) |
-| `sglang/launch-configs/vllm_e4b_audio.sh` + `Dockerfile.e4b-audio` | E4B+audio 서빙 |
+| `sglang/launch-configs/vllm_e4b_audio.sh` + `Dockerfile.e4b-audio` | E4B+audio 서빙 (image:16,audio:4) |
+| `tools/spike_cold_prefill.py` | D6 cold kill-test (오디오 cold 바닥 + confirm) |
+| `tools/spike_visual_fingers.py` | D7 다중이미지 binding 한계 진단 |
+| `tools/spike_visual_temporal_v2.py` | D7 프레임별+집계 아키텍처 검증 |
 
 ## D4. GPU 위생 규칙
 
