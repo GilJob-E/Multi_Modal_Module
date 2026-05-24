@@ -3,6 +3,8 @@
 # E4B는 작아 단일 GPU(TP 불필요). 오디오 의존성은 파생 이미지(Dockerfile.e4b-audio)로 보강.
 # audio=4: cold kill-test 레버 A([chunk1,chunk2] 다중 audio_url 파트 전송)와
 #          향후 청크 점진 캐싱을 위해 audio 슬롯 ≥2 필요(이전 Phase1은 audio=1).
+# video=1: D8 슬라이딩 윈도우 — video_url(시각 시간축 binding) + audio_url(청각) 조합 전송.
+#          vLLM은 video당 ~32프레임 고정(2fps), video_url은 오디오 안 실음 → audio_url 별도.
 # 종료: docker stop vllm-gemma4-e4b  (GPU 위생: 이후 nvidia-smi로 VRAM 해제 확인)
 set -euo pipefail
 
@@ -26,7 +28,7 @@ docker run -d --name "$NAME" \
   "$IMAGE" \
   --model google/gemma-4-E4B-it \
   --max-model-len 8192 \
-  --limit-mm-per-prompt '{"image":16,"audio":4}' \
+  --limit-mm-per-prompt '{"image":16,"audio":4,"video":1}' \
   --enable-prefix-caching \
   --dtype bfloat16
 

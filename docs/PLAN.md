@@ -178,6 +178,85 @@ native AV 평가**(프레임 3~5장 + 오디오 한 프롬프트 = 기존 `nativ
 **시선/고개/태도 + verbal/vocal 피드백을 루브릭으로 채점** — 손가락-카운트류 메트릭이 아니라
 deliverable 자체를 검증. product-관련 신호가 입증적으로 빠질 때만 그 신호 한정 프레임별 보강 고려.
 
+## 프로덕트 — GilJob 사이드카 분석 모듈 (현 단계, 2026-05-24 확정)
+
+실험/스파이크 단계 종료. 핵심 미지수(native AV 품질·prosody·video_url 시간축 binding·
+latency·슬라이딩 윈도우 viability)는 모두 입증됨. 이제 **버리는 스파이크가 아니라
+유지보수 가능한 프로덕트 모듈**을 짠다.
+
+### 궁극 목적 (2026-05-24 사용자 정의) — 사람 같은 실시간 비언어 상호작용
+면접관 아바타가 지원자가 말하는 동안 **끄덕이거나 갸우뚱**하고, 지원자 비언어를 읽어
+속으로/겉으로 평가하거나, 역으로 비언어 신호를 준다(backchannel). Gemini Live는 오디오
+응답이 일이라 이걸 못 한다 = gje의 델타. **GilJob엔 아바타 렌더링이 이미 있으나
+(단순 SVG는 면접 *상태*로 눈·입만, 3D `SpatialAvatar`는 Gemini 오디오 립싱크만) 지원자가
+말하는 동안 무반응** — gje가 *무엇을·언제* 표현할지 구동하는 **두뇌** = 이 프로젝트의
+마지막 퍼즐.
+
+### 타깃과 분담
+- **타깃 = GilJob**(`github.com/GilJob-E/GilJob`, 라이브 `giljob-e.giljobe2.workers.dev`):
+  Cloudflare Workers + React/Vite, **Gemini Live API**(`gemini-3.1-flash-live-preview`)
+  한국어 면접. **최소 변경**이 제약.
+- **GilJob 소유(불변)**: 캡처, 수동 VAD(`activityStart/End` 버튼), 라이브 대화, **집계(Gemini)**,
+  아바타 렌더링(`Avatar.tsx` / `SpatialAvatar.tsx` `@spatialwalk/avatarkit`).
+- **gje 소유**: 윈도우잉 + native AV 분석. **두 출력 채널** —
+  ① **실시간 비언어 반응**(핵심·신규): 발화 중 지원자 비언어 read → 아바타 반응 큐
+     (끄덕임/갸우뚱/표정), 저지연 연속(~1–3s cadence), 아마 Gemini 안 거치고 아바타 직결.
+  ② **평가 신호**: 16초 윈도우/end-of-turn native AV 분석 → 구조화 신호를 Gemini에 주입(다음질문 반영).
+  캡처/VAD 안 함. 두 채널 모두 native 이해로(저수준 feature 금지).
+
+### 데이터 흐름 (탭 → 분석 → 주입)
+1. **탭**: `worker/ws-bridge.ts:80–97`에서 미디어 프레임을 gje로 fire-and-forget 포워딩
+   (Gemini로는 그대로 전송). 입력 = 오디오 16kHz PCM Int16 base64(~128ms), 비디오
+   640×480 JPEG base64 **@1fps**, activity 마커.
+2. **윈도우 분석**: gje가 턴 동안 **16초 윈도우**를 누적 → 각 윈도우를 **독립 추론**
+   (발화 중 분산처리, KV prefix-stability 불필요). 윈도우 = 1fps 프레임 16장을 **mp4로
+   재인코딩 → `video_url`**(시간축 binding, D8) + 16초 PCM→wav **`audio_url`** 조합.
+   multi-image 덤프 금지(binding 깨짐, D7). 16프레임 < 32 상한 OK.
+3. **end-of-turn**: `activityEnd` 시 마지막(부분) 윈도우만 cold(~1s) 처리 → 그 윈도우 신호 emit.
+   **gje는 윈도우 신호를 병합/종합하지 않는다** — per-window 신호를 그대로 내보내고 **집계는 Gemini 몫**.
+4. **주입**: `src/lib/system-instruction.ts` 시스템프롬프트 컨텍스트로 다음 턴에 삽입.
+   ⚠️ **1007 불변식**: `realtimeInput.text`를 activity 마커와 섞으면 WS 1007 종료 →
+   주입은 activity 윈도우 밖/시스템프롬프트 경로로만.
+
+### 레이턴시 예산 (라이브라 빡빡)
+- 윈도우 분석은 발화 중 흡수. end-of-turn 잔여 = 마지막 윈도우(~0.72s combo) + 병합.
+- 부팅 1회 CUDA 그래프 비용(~1.2s)은 기동 더미 요청으로 선warm.
+- 목표: `activityEnd` → 신호 주입까지 thinking 갭(~1–2s) 안에 완료.
+
+### 출력 계약 (gje의 산출물 = 분석 신호. 렌더링/주입은 소비자 측)
+gje는 **구조화된 분석 신호만** 낸다. 소비(아바타 렌더링·Gemini 주입)는 GilJob 측 일 — 이 레포 밖.
+- **① 실시간 비언어 신호**: `{signal: engaged|nodding-worthy|hesitation|..., intensity, t}`
+  류 저지연 연속(~1–3s cadence). *지원자 비언어의 read* — 이걸 어떤 아바타 제스처로 매핑할지는 소비자 결정.
+- **② 평가 신호**: 구조화 JSON, 예 `{verbal:{...}, vocal:{prosody, pace, pauses,
+  intonation}, visual:{eye_contact, posture, expression, gesture_over_time}, key_observations:[]}`.
+gje는 최종 산문 피드백도, 아바타 제어 명령도 만들지 않는다.
+
+### 인터페이스 경계
+gje = **사이드카 HTTP 서비스**(Worker가 호출). vLLM은 서비스 뒤에 숨김(성공기준 #4).
+`GEMINI_API_KEY`는 gje가 절대 안 봄(Worker가 프록시). same-origin 게이트 유지.
+
+### 범위 경계 (스코프 크립 방지)
+**이 레포 = 사이드카 분석 모듈의 완성, 그 이상도 이하도 아니다.** 다음은 **gje 범위 밖**(소비자/GilJob 측):
+아바타 제어 API(`@spatialwalk/avatarkit`)·렌더링·제스처 매핑, WS 브리지 탭 구현, 시스템프롬프트
+주입·1007 처리. 이것들은 gje가 *플러그되는 환경*으로만 알면 되고, gje가 만들지 않는다.
+사람같은 상호작용은 *왜 이 신호가 필요한가*(목적)일 뿐, gje의 산출물 경계는 **분석 신호에서 끝난다.**
+
+### 열린 항목 (gje 범위 내)
+- **분석 출력 계약 정의 + 검증** — 실제 면접 클립에서 E4B가 *신뢰성 있게* 읽어내는 비언어·평가
+  신호가 무엇인지 실측해 ①②의 스키마를 확정(evidence-first). **빌드 첫 작업.**
+- **2-tier 처리**: 반응 신호 cadence(~1–3s 짧은 window read) vs 평가 cadence(16초/턴)를 한 모듈에서.
+  fast tier도 native 이해로(저수준 feature 금지).
+- 16초 윈도우 경계서 잘린 제스처/문장 처리. (윈도우 신호 *병합*은 gje 일 아님 — Gemini가 집계.)
+  per-window 신호 패키징/스트리밍 형식만 정의.
+- 긴 답변 rolling window. 라이브 1fps ↔ 분석 품질(시간해상도 1fps 고정).
+- gje 서비스 인터페이스(HTTP) + 배포 형태(GilJob edge와 별개 로컬/사설 호스트).
+
+### 구현 산출물(예정)
+- `src/local_infer/native_eval.py` 확장: 윈도우 스케줄러 + 독립 추론 + per-window 신호 emit(집계 없음).
+- 사이드카 HTTP 서비스(`app.py` 신규, fastapi/uvicorn 의존 추가) — 탭 수신 + 신호 반환.
+- 윈도우 재인코딩 유틸(1fps JPEG들 → mp4, PCM → wav).
+- GilJob 측 최소 패치(별도 repo): ws-bridge 탭 5줄 + system-instruction 주입.
+
 ## Project-manager 스캐폴딩 (병행)
 
 - 프로젝트 프레임 문서(목적·기준·디렉터리)와 CLAUDE.md를 교정된 내용으로 갱신.
