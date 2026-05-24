@@ -16,7 +16,7 @@
 - **리서치 결론 (Gemma 4 바리언트·native 오디오·출처)** — `docs/RESEARCH.md`
 - **결정과 근거 (엔진/벤치/모델, 재사용 코드 포인터)** — `docs/DECISIONS.md`
 
-**현재 상태:** Phase 1 스파이크 완료·커밋(`f15d137`) → **아키텍처 (1) 단일 E4B native AV 확정**. 첫 코드 산출물 존재(`src/local_infer/native_audio.py`, `tools/spike_e4b_native_av.py`, E4B+audio 서빙 config). **Phase 2(군더더기 절단)는 폐지** — wipe가 이미 cruft를 비웠고 검증된 경로(프레임+audio_url)가 복구 목록과 어긋나, Phase 3 JIT 복구로 흡수. 다음 단계는 `docs/PLAN.md`의 Phase 3(턴 단위 + periodic prefill). 재사용 코드는 import 시점에 `git show f80e447:local-infer/src/local_infer/<f>.py`로 꺼내 `src/local_infer/`에 둔다(경로 리맵).
+**현재 상태:** Phase 1·2 완료(아키텍처 (1) 단일 E4B native AV 확정, Phase 2 폐지·흡수). **Phase 3**에서 평가자 인터페이스·품질·nativeness는 구현됐으나 **간판 방법론 periodic prefill의 latency 실효는 미입증**(최초 "31.5배"는 best-case 과대광고, 정정됨 — 라이브에선 최종 오디오를 미리 못 데움). **다음 단계는 cold kill-test 스파이크**(`docs/PLAN.md` "## 남은 갭"): 오디오 cold 바닥 + 청크 점진 캐싱 가능 여부로 thesis 생사 판정. Phase 4 백지화. 재사용 코드는 import 시점에 `git show f80e447:local-infer/src/local_infer/<f>.py`로 `src/local_infer/`에 둔다(경로 리맵).
 
 **반드시 기억할 사실 (재발 방지):**
 - 오디오는 Gemma 4 **E2B/E4B에만** 있다. 31B·26B-A4B는 오디오 입력 불가.

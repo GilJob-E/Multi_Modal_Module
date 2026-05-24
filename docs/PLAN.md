@@ -78,23 +78,43 @@
 남은 실질 작업은 ① living docs stale 교정(완료) ② Phase 3 JIT 복구 규칙
 명문화(아래)뿐. `native_audio.py`(audio_url 교정 + 30초 캡)는 Phase 1에서 이미 복구됨.
 
-## Phase 3 — 턴 단위 native 파이프라인 + periodic prefill ✅ 완료 (2026-05-24)
+## Phase 3 — 턴 단위 native 파이프라인 + periodic prefill ⚠️ 부분 완료 / latency 미검증 (2026-05-24)
 
-**결과: periodic prefill 실효 정량 입증 — end-of-turn TTFT warm-off 1.226s → warm-on 0.039s (31.5배 단축), 평가 품질(verbal/vocal/visual + prosody) 회귀 없음.** 결과물 표면은 파이썬 평가자 + 하니스(FastAPI HTTP는 소비자 생기면 얇게, 범위 밖). 증거 `.sisyphus/evidence/phase3-prefill-effect.json`. 아래는 수행 기록.
+**정정(2026-05-24):** 최초 "✅ periodic prefill 31.5배 단축(1.226s→0.039s)"은 **과대광고였다.** 하니스가 warm 시점에 **이미 최종 오디오를 손에 쥐고** 동일 prompt를 두 번 보낸 것이라, 측정한 건 **identical-prefix 캐시 재사용(best case)**뿐 — Phase 1이 이미 보여준 사실이다. 라이브에선 최종 오디오가 턴 종료 시점에야 확정되므로 그 prefix를 미리 데울 수 없다.
+
+**실제로 입증된 것**: 파이프라인 동작 + 평가 품질(verbal/vocal/visual + prosody) + native 오디오 이해 + vLLM 숨긴 인터페이스. **미입증(핵심 갭)**: 간판 방법론 periodic prefill의 latency 실효 — 비싼 오디오 prefill은 턴마다 cold라고 가정해야 한다. 상세·다음 작업은 **## 남은 갭 + cold kill-test** 참조. 증거 `.sisyphus/evidence/phase3-prefill-effect.json`(best-case 수치이므로 그대로 신뢰 금지). 아래는 수행 기록.
 
 - **평가자 인터페이스** (`src/local_infer/native_eval.py`): `NativeInterviewEvaluator` — `add_frame`/`set_audio_window`(턴 중 push) → `warm`(prefix 캐시 프라임) → `evaluate`(SSE 스트리밍). vLLM은 평가자 뒤에 숨김(성공 기준 #4).
-- **periodic prefill 기제** (실측): 평가 루브릭을 **system 프롬프트에 고정**, user 턴 = `[image_url 프레임…, audio_url, 고정 text]`. warm(max_tokens=1)과 evaluate가 **전체 prefix를 공유** → `--enable-prefix-caching` 풀히트. **핵심: warm/evaluate는 동일 프레임·오디오 객체를 재사용해야 토큰이 일치해 캐시가 맞는다**(재추출하면 미스). "periodic" = push마다 warm.
+- **periodic prefill 기제** (구현됨, 단 best-case에서만 검증): 평가 루브릭을 **system 프롬프트에 고정**, user 턴 = `[image_url 프레임…, audio_url, 고정 text]`. warm(max_tokens=1)과 evaluate가 전체 prefix를 공유하면 `--enable-prefix-caching` 풀히트. **단 이 풀히트는 warm/evaluate가 동일 오디오 객체를 쓸 때만 성립** — 라이브에선 최종 오디오를 미리 못 쥐므로 이 조건이 깨진다(= 갭의 핵심).
 - **검증된 레시피 기준선**: 전송 = 샘플 `image_url` 프레임 + `audio_url` + 고정 text(스파이크 그대로). payload는 **인라인으로** 빌드(`native_payloads.py` 원형 복구 안 함 — video_url 모양이라 부적합).
 - **JIT 복구 완료** (f80e447 → `src/local_infer/`, verbatim, cruft import 없음 확인): `vllm_client.py`, `vllm_stream.py`, `frame_store.py`. `pyproject.toml`은 `requests`만(HTTP 미구현이라 fastapi/uvicorn 제외).
 - **30초 오디오 캡 ↔ 긴 답변**: rolling window(최근 윈도우 + 누적 요약)는 **미구현 — 범위 밖**(코어는 최신 ≤30초 윈도우만 평가). 추후 refinement.
 - **video_url 재고 조건**: `native_media_store.py`·`native_payloads.py`는 video_url 전송을 별도 실측한 뒤에만 복구 검토(현재 미사용).
 - 아키텍처: (1) 단일 E4B native AV 확정(Phase 1) — 2-스테이지 분기 폐기.
 
-## Phase 4 — 검증
+## Phase 4 — 백지화 (2026-05-24)
 
-- 스파이크 루브릭을 완성 파이프라인에 재적용(품질 회귀 방지).
-- **periodic prefill 효과 측정**: 같은 턴을 prefill 워밍 on/off로 end-of-turn TTFT 비교 → 방법론이 실제로 지연을 줄이는지 정량 입증.
-- `PYTHONPATH=src uv run --with pytest --with httpx pytest tests -q` 전체 통과. 베이스라인 테스트(`test_native_payloads.py` 등)는 옛 `input_audio`/`video_url` 규격을 단언하므로 **그대로 복구 금지** — Phase 3에서 확정된 인라인 payload(프레임+audio_url)에 맞춰 새로 작성.
+사용자 결정으로 폐지. 근거: ① 품질 루브릭 재적용·② periodic prefill 효과 측정은
+Phase 3 하니스(`tools/turn_pipeline_demo.py`)가 이미 1회 실측으로 커버했고(단 ②는
+best-case라 무효), ③ 정식 pytest 스위트는 현 단계에서 만들지 않는다. 진짜 다음
+작업은 아래 cold kill-test.
+
+## 남은 갭 + cold kill-test (현 단계 핵심)
+
+**갭(1차 원리):** 라이브 면접 턴에서 비용을 지배하는 건 현재 턴의 **오디오 prefill**인데, 최종 오디오는 **턴 종료(VAD) 시점에야 확정**되고 하나의 ≤30초 블롭이라 **미리 데울 수 없다 → 턴마다 cold라고 가정해야 한다.** 데울 수 있는 건 system 프롬프트·이전 턴 텍스트·이미 찍힌 프레임뿐인데 전부 싼 부분이라 0.5s 목표를 못 가른다. 즉 periodic prefill은 **정작 비싼 모달리티에 warm 대상이 없다.** Phase 3의 31.5배는 이 cold 현실을 회피(최종 오디오를 미리 쥠)한 best-case 측정이었다.
+
+**유일한 탈출구이자 thesis 생사 질문:** 오디오를 **청크로 쪼개 스트리밍**할 때 앞 청크의 KV가 캐시 재사용되는가? 되면 발화 중 청크를 데워 end-of-turn엔 **마지막 청크만 cold** → viable. 안 되면 오디오는 턴마다 통째 cold → periodic prefill로 오디오 latency 못 줄임 → **latency 스토리 재설계 필요.**
+
+**스파이크 (`tools/spike_cold_prefill.py`, Phase 1식 kill-test):** 콘텐츠를 매번 다르게 줘 cold를 강제하며 측정.
+1. **Cold 바닥**: 오디오 길이별(5/10/20/30초) end-of-turn TTFT 격리 측정 — 진짜 baseline(프레임 섞인 Phase 3의 1.2s 대체).
+2. **프레임-warm 한계**: `[system, 프레임]`만 데운 뒤 `[system, 프레임, cold 오디오]` eval → 완전 cold 대비 얼마나 깎이나(예상: marginal, 정량 확인용).
+3. **오디오 점진 캐싱 (핵심)**: launch를 `--limit-mm-per-prompt audio>=2`로 재기동. `[system, 청크1]` 데운 뒤 `[system, 청크1, 청크2]` → 청크1 KV가 재사용되나(자라는 오디오 캐시 히트)? + 청크 분할 eval이 통오디오만큼 일관된 평가를 내나.
+
+**결정 규칙:**
+- item3 **히트 AND 청크 eval 일관** → periodic prefill viable(스트리밍 청크 워밍). Phase 3를 청크-오디오 워밍으로 재설계, end-of-turn=마지막 청크 prefill로 <0.5s 도달 여부 재측정.
+- item3 **미스** → 오디오 cold 확정. periodic prefill 무효 → latency 재설계 옵션을 사용자와 결정: (a) eval 오디오 윈도우 단축, (b) VAD trailing-silence 동안 overlap prefill, (c) <0.5s 목표 수정.
+
+증거 `.sisyphus/evidence/spike-cold-prefill.json`. GPU 위생 준수(`docker stop` + nvidia-smi).
 
 ## Project-manager 스캐폴딩 (병행)
 

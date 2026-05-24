@@ -31,9 +31,12 @@
 `.sisyphus/evidence/spike-e4b-native-av.json`). 이전 audio "no-go"는 모델 천장이
 아니라 payload 버그였음 확인. 검증된 전송 = 샘플 프레임(`image_url`) + `audio_url`.
 
-다음 단계는 **Phase 3 — 턴 단위 native 파이프라인 + periodic prefill**(`docs/PLAN.md`).
-Phase 2(군더더기 절단)는 폐지하고 Phase 3 JIT 복구로 흡수했다(wipe가 이미 cruft를
-비웠고, 검증된 경로가 video_url 복구 목록과 어긋나기 때문).
+**Phase 3**(턴 파이프라인 + periodic prefill)에서 평가자 인터페이스·품질·nativeness는
+구현·확인됐으나, **간판 방법론인 periodic prefill의 latency 실효는 미입증이다.** 최초
+"31.5배 단축"은 하니스가 최종 오디오를 미리 쥔 best-case 측정이었고(정정됨), 라이브에선
+최종 오디오가 턴 종료 시점에야 확정돼 미리 데울 수 없다. 다음 단계는 이 갭을 cold
+조건에서 검증하는 **cold kill-test 스파이크**(`docs/PLAN.md` "## 남은 갭"). Phase 2는
+폐지·흡수, Phase 4는 백지화됨.
 
 ## 디렉터리
 
