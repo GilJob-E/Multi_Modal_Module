@@ -101,18 +101,25 @@ best-case라 무효), ③ 정식 pytest 스위트는 현 단계에서 만들지 
 
 ## 남은 갭 + cold kill-test (현 단계 핵심)
 
-**갭(1차 원리):** 라이브 면접 턴에서 비용을 지배하는 건 현재 턴의 **오디오 prefill**인데, 최종 오디오는 **턴 종료(VAD) 시점에야 확정**되고 하나의 ≤30초 블롭이라 **미리 데울 수 없다 → 턴마다 cold라고 가정해야 한다.** 데울 수 있는 건 system 프롬프트·이전 턴 텍스트·이미 찍힌 프레임뿐인데 전부 싼 부분이라 0.5s 목표를 못 가른다. 즉 periodic prefill은 **정작 비싼 모달리티에 warm 대상이 없다.** Phase 3의 31.5배는 이 cold 현실을 회피(최종 오디오를 미리 쥠)한 best-case 측정이었다.
+**프레이밍(1차 원리, problem-solver 2026-05-24):** "오디오는 프리필 불가"는 **법칙이 아니라 검증 안 된 가정 3개의 합**이었다. 프리필 지연 이득 = "최종 오디오 KV를 턴 종료 *전에* 계산해 VAD 시점에 캐시돼 있게" 하는 것. 핵심 통찰: **프레임과 오디오는 대칭이다** — 시각 t에서 `[턴시작, t]` 오디오는 이미 도착·불변이고 모르는 건 미래뿐(프레임과 동일). "오디오 cold"가 성립하려면 ①Gemma 오디오 인코더가 클립 전체 global attention(앞 청크 토큰이 뒤에 의존) ②단일 블롭 전송 ③VAD trailing-silence lead time 무시 — 셋이 *동시에* 참이어야 하는데 ①은 미검증 가정, ②는 우리 선택, ③은 놓친 자원이다. Phase 3의 31.5배는 cold 현실을 회피(최종 오디오를 미리 쥠)한 best-case였다.
 
-**유일한 탈출구이자 thesis 생사 질문:** 오디오를 **청크로 쪼개 스트리밍**할 때 앞 청크의 KV가 캐시 재사용되는가? 되면 발화 중 청크를 데워 end-of-turn엔 **마지막 청크만 cold** → viable. 안 되면 오디오는 턴마다 통째 cold → periodic prefill로 오디오 latency 못 줄임 → **latency 스토리 재설계 필요.**
+**오디오 VAD 지연 레버 (MECE):**
+- **A. 청크 점진 캐싱** — 발화 중 오디오 청크를 데워 VAD엔 마지막 청크만 cold. 조건: 인코더 **청크 prefix-stable**(가정①의 반대). 효과 큼 = thesis 핵심.
+- **B. VAD silence lead time** — VAD는 ~500ms 침묵 확인 후 발화하므로 *의미 있는 오디오는 침묵 시작 시 이미 확정* → 침묵窗에 prefill 선행. 조건 없음(무조건 가능), prefill<침묵窗이면 완전 은닉.
+- **C. 오디오 윈도우 단축** — 마지막 N초만 평가(품질 트레이드오프). prefill ∝ 토큰 수.
+- (D. 스트리밍 인코더는 모델 교체급이라 범위 밖.)
+- **A·B는 곱셈**: A로 발화 중 대부분 캐시 → 침묵 시작 시 짧은 tail만 → B의 침묵窗에 흡수 → VAD에 완전 warm. 성립 시 <0.5s 현실적.
 
-**스파이크 (`tools/spike_cold_prefill.py`, Phase 1식 kill-test):** 콘텐츠를 매번 다르게 줘 cold를 강제하며 측정.
-1. **Cold 바닥**: 오디오 길이별(5/10/20/30초) end-of-turn TTFT 격리 측정 — 진짜 baseline(프레임 섞인 Phase 3의 1.2s 대체).
-2. **프레임-warm 한계**: `[system, 프레임]`만 데운 뒤 `[system, 프레임, cold 오디오]` eval → 완전 cold 대비 얼마나 깎이나(예상: marginal, 정량 확인용).
-3. **오디오 점진 캐싱 (핵심)**: launch를 `--limit-mm-per-prompt audio>=2`로 재기동. `[system, 청크1]` 데운 뒤 `[system, 청크1, 청크2]` → 청크1 KV가 재사용되나(자라는 오디오 캐시 히트)? + 청크 분할 eval이 통오디오만큼 일관된 평가를 내나.
+**진짜 미지수(thesis 생사):** Gemma 오디오 인코더가 **청크 prefix-stable한가**(레버 A 성립 여부). 이 하나가 전부를 가른다.
+
+**스파이크 (`tools/spike_cold_prefill.py`, Phase 1식 kill-test):** 콘텐츠를 매번 다르게 줘 cold 강제.
+1. **Cold 바닥 / 레버 C**: 오디오 길이별(5/10/20/30초) end-of-turn TTFT 격리 측정 — 진짜 baseline + "윈도우 얼마면 단독으로 0.5s 드나".
+2. **레버 A (핵심)**: launch `--limit-mm-per-prompt audio>=2` 재기동. `[system, 청크1]` 데운 뒤 `[system, 청크1, 청크2]` → 청크1 KV 히트하나(자라는 오디오 캐시) + 청크 분할 eval이 통오디오만큼 일관한가. → 인코더 prefix-stability 직접 판정.
+3. **레버 B 정량**: 실제 VAD hangover(예 500ms) vs "tail만 cold일 때 prefill 시간" — tail이 침묵窗에 들어가나. (참고: 프레임-warm 한계도 부수 측정 — 예상 marginal.)
 
 **결정 규칙:**
-- item3 **히트 AND 청크 eval 일관** → periodic prefill viable(스트리밍 청크 워밍). Phase 3를 청크-오디오 워밍으로 재설계, end-of-turn=마지막 청크 prefill로 <0.5s 도달 여부 재측정.
-- item3 **미스** → 오디오 cold 확정. periodic prefill 무효 → latency 재설계 옵션을 사용자와 결정: (a) eval 오디오 윈도우 단축, (b) VAD trailing-silence 동안 overlap prefill, (c) <0.5s 목표 수정.
+- 레버 A **히트 AND 청크 eval 일관** → periodic prefill viable. Phase 3를 청크-오디오 스트리밍 워밍으로 재설계, end-of-turn=마지막 청크 prefill(+레버 B)로 <0.5s 도달 재측정.
+- 레버 A **미스** → 오디오 통째 cold 확정. 그래도 죽지 않음 — **레버 B+C 조합**으로 갈 수 있나 측정(짧은 윈도우를 침묵窗에 prefill). 그것도 안 되면 <0.5s 목표 수정을 사용자와 결정.
 
 증거 `.sisyphus/evidence/spike-cold-prefill.json`. GPU 위생 준수(`docker stop` + nvidia-smi).
 
