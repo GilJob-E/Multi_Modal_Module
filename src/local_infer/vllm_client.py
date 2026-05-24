@@ -27,6 +27,16 @@ class VllmClient:
         r.raise_for_status()
         yield from iter_sse_delta_text(r.iter_lines())
 
+    def chat(self, payload: dict) -> dict:
+        """non-stream chat → 전체 응답 JSON(choices/usage 포함). 구조화 출력 파싱용."""
+        r = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={**payload, "stream": False},
+            timeout=300,
+        )
+        r.raise_for_status()
+        return r.json()
+
 
 def default_vllm_client() -> VllmClient:
     return VllmClient(os.getenv("VLLM_BASE_URL", "http://localhost:8000"))

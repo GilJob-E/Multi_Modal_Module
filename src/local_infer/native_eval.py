@@ -92,3 +92,134 @@ class NativeInterviewEvaluator:
     def evaluate(self, session_id: str, *, n_frames: int = 3, max_tokens: int = 768) -> Iterator[str]:
         """평가를 토큰 단위로 스트리밍한다. 호출자가 TTFT를 측정한다."""
         yield from self.client.stream_chat(self._payload(session_id, n_frames=n_frames, max_tokens=max_tokens))
+
+
+# ─── M2: 윈도우 평가자 (D8 video_url+audio_url 경로, per-window 구조화 신호) ─────────────
+# 위 NativeInterviewEvaluator는 Phase 3의 image_url+periodic-prefill 경로(D8로 대체).
+# 아래가 제품 경로: 윈도우(1fps 프레임+PCM) → video_url+audio_url → E4B → JSON 신호.
+
+import json
+import re
+
+from .signals import NONVERBAL_STATES, EvaluationSignal, NonVerbalSignal
+from .window_assembly import assemble_audio_url, assemble_video_url
+
+NONVERBAL_SYSTEM = (
+    "You are observing a job candidate during a live video interview — a few seconds of "
+    "video (with audio). Read ONLY their non-verbal state right now from face, eyes, posture, "
+    "and voice tone. Do NOT transcribe or judge answer content. Respond with a SINGLE JSON "
+    "object and nothing else: "
+    '{"state": one of ' + "[" + ", ".join(NONVERBAL_STATES) + "], "
+    '"intensity": number 0.0-1.0, "note": short phrase}.'
+)
+
+EVAL_SYSTEM = (
+    "You are an interviewer evaluating ~16 seconds of a candidate's answer (video + audio). "
+    "Respond with a SINGLE JSON object and nothing else, with keys: "
+    '"verbal": {"logic": str, "structure": str, "specificity": str}, '
+    '"vocal": {"volume": str, "pace": str, "pauses": str, "intonation": str}, '
+    '"visual": {"eye_contact": str, "posture": str, "expression": str, "gesture_over_time": str}, '
+    '"key_observations": [str, ...]. Each leaf is a short concrete assessment in Korean.'
+)
+
+
+def _video_part(url: str) -> dict:
+    return {"type": "video_url", "video_url": {"url": url}}
+
+
+def _audio_part(url: str) -> dict:
+    return {"type": "audio_url", "audio_url": {"url": url}}
+
+
+def _extract_json(text: str) -> dict:
+    """모델 출력에서 첫 JSON object를 파싱. 실패 시 ValueError."""
+    text = text.strip()
+    # ```json ... ``` 펜스 제거
+    text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.MULTILINE).strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    m = re.search(r"\{.*\}", text, flags=re.DOTALL)
+    if m:
+        return json.loads(m.group(0))
+    raise ValueError(f"no JSON object in output: {text[:200]!r}")
+
+
+class WindowEvaluator:
+    """vLLM을 숨긴 윈도우 단위 평가자. 윈도우(1fps JPEG 프레임 + 16kHz PCM)를 받아
+    video_url+audio_url로 조립해 E4B에 보내고, per-window 구조화 신호를 반환한다.
+    집계는 하지 않는다(Gemini 몫) — 두 메서드 모두 *한 윈도우*의 신호만 낸다.
+    """
+
+    def __init__(self, *, client: VllmClient | None = None, model: str = MODEL) -> None:
+        self.client = client or default_vllm_client()
+        self.model = model
+
+    def _ask_json(self, *, system: str, content: list[dict], max_tokens: int) -> dict:
+        resp = self.client.chat(
+            {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": content},
+                ],
+                "max_tokens": max_tokens,
+                "temperature": 0.0,
+            }
+        )
+        return _extract_json(resp["choices"][0]["message"]["content"])
+
+    def read_nonverbal(
+        self,
+        jpeg_frames: list[bytes],
+        pcm: bytes,
+        *,
+        t: float,
+        window_s: float,
+        src_fps: float = 1.0,
+        sample_rate: int = 16000,
+    ) -> NonVerbalSignal:
+        """채널 ① — 짧은 윈도우에서 지원자 비언어 상태 read."""
+        content = [_video_part(assemble_video_url(jpeg_frames, src_fps=src_fps))]
+        if pcm:
+            content.append(_audio_part(assemble_audio_url(pcm, sample_rate=sample_rate)))
+        content.append({"type": "text", "text": "Read the candidate's non-verbal state now."})
+        data = self._ask_json(system=NONVERBAL_SYSTEM, content=content, max_tokens=96)
+        state = str(data.get("state", "neutral")).strip().lower()
+        if state not in NONVERBAL_STATES:
+            state = "neutral"
+        try:
+            intensity = max(0.0, min(1.0, float(data.get("intensity", 0.0))))
+        except (TypeError, ValueError):
+            intensity = 0.0
+        return NonVerbalSignal(
+            t=t, window_s=window_s, state=state, intensity=intensity,
+            note=str(data.get("note", ""))[:120],
+        )
+
+    def evaluate_window(
+        self,
+        jpeg_frames: list[bytes],
+        pcm: bytes,
+        *,
+        window_start_s: float,
+        window_dur_s: float,
+        src_fps: float = 1.0,
+        sample_rate: int = 16000,
+    ) -> EvaluationSignal:
+        """채널 ② — 16초 윈도우 verbal/vocal/visual 평가."""
+        content = [
+            _video_part(assemble_video_url(jpeg_frames, src_fps=src_fps)),
+            _audio_part(assemble_audio_url(pcm, sample_rate=sample_rate)),
+            {"type": "text", "text": "Evaluate this answer window."},
+        ]
+        data = self._ask_json(system=EVAL_SYSTEM, content=content, max_tokens=640)
+        return EvaluationSignal(
+            window_start_s=window_start_s,
+            window_dur_s=window_dur_s,
+            verbal=data.get("verbal", {}) if isinstance(data.get("verbal"), dict) else {},
+            vocal=data.get("vocal", {}) if isinstance(data.get("vocal"), dict) else {},
+            visual=data.get("visual", {}) if isinstance(data.get("visual"), dict) else {},
+            key_observations=[str(x) for x in data.get("key_observations", [])][:8],
+        )

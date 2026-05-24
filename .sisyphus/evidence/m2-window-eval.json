@@ -1,0 +1,42 @@
+{
+  "clip": "vid_0001.mp4",
+  "evaluation": {
+    "latency_s": 5.11,
+    "signal": {
+      "window_start_s": 0.0,
+      "window_dur_s": 16.0,
+      "verbal": {
+        "logic": "논리적 흐름이 자연스럽다.",
+        "structure": "자기소개에 필요한 기본 요소들을 잘 포함하고 있다.",
+        "specificity": "전공과 학교를 구체적으로 언급하여 신뢰감을 준다."
+      },
+      "vocal": {
+        "volume": "적절한 볼륨으로 또렷하게 말하고 있다.",
+        "pace": "적당한 속도로 말하고 있어 듣기 편안하다.",
+        "pauses": "자연스러운 곳에서 잠시 멈추며 호흡을 조절한다.",
+        "intonation": "전반적으로 안정적이고 자신감 있는 억양이다."
+      },
+      "visual": {
+        "eye_contact": "카메라를 응시하며 안정적인 시선을 유지하고 있다.",
+        "posture": "바른 자세로 앉아 있어 프로페셔널한 인상을 준다.",
+        "expression": "차분하고 자신감 있는 표정을 짓고 있다.",
+        "gesture_over_time": "특별한 제스처 없이 차분하게 말하고 있다."
+      },
+      "key_observations": [
+        "자기소개에 필요한 핵심 정보를 빠짐없이 전달했다.",
+        "전반적으로 자신감 있고 안정적인 태도를 보여주었다.",
+        "발음이 명확하고 또렷하게 들린다."
+      ]
+    }
+  },
+  "nonverbal": {
+    "latency_s": 0.47,
+    "signal": {
+      "t": 7.5,
+      "window_s": 3.0,
+      "state": "engaged",
+      "intensity": 0.8,
+      "note": "maintaining eye contact and good posture"
+    }
+  }
+}
