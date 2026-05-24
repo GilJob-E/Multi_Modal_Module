@@ -101,6 +101,34 @@ best-case라 무효), ③ 정식 pytest 스위트는 현 단계에서 만들지 
 
 ## 남은 갭 + cold kill-test (현 단계 핵심)
 
+### ✅ 결론 (2026-05-24 실측 — thesis 정정): periodic prefill은 ≤30s·E4B에서 **불필요**
+
+cold kill-test와 신선 콘텐츠(`vid_0001`) 확증 스파이크 결과, 간판 방법론
+periodic prefill이 풀려던 문제("비싼 오디오 prefill을 숨겨야 한다")가 **이 조건에선
+존재하지 않는다.** 실측(`.sisyphus/evidence/spike-cold-prefill.json`):
+
+- **cold 바닥이 이미 싸다.** 매번 unique=cache-miss인 오디오로도 end-of-turn TTFT가
+  10s 0.08s / 20s 0.11s / 30s 0.12s(길이 비례 = 진짜 cold). Gemma 오디오 인코더가
+  30s를 소수 토큰으로 압축하기 때문. 목표 <0.5s를 **periodic prefill 없이 충족.**
+- **warm 전제 없음(Phase 3 정정의 핵심).** 신선 `vid_0001`로 서로 다른 30s 클립 6개를
+  연속 발사 → 턴1(부팅) e2e 1.19s, **턴2~6(전부 unique cold) e2e 0.17~0.20s.** 클라이언트측
+  추출(ffmpeg+base64) ~70ms 포함한 end-to-end도 <0.2s. per-turn 캐시 히트에 의존하지 않음.
+- **유일한 비싼 턴 = 부팅 첫 호출 1.19s**(CUDA 그래프 1회성 컴파일). 기동 시 더미 요청
+  하나로 선warm하면 첫 유저 턴부터 ~0.18s. per-turn에 warm을 끼워넣는 게 아님.
+- **레버 A(인코더 청크 prefix-stable) = 미스**(워밍한 chunk1 KV 재사용 안 됨). 그러나
+  절대 비용이 0.1s대라 **무의미** — periodic prefill로 아껴봐야 이미 sub-0.5s.
+- **레버 B**: tail 1/2/5s prefill 55~72ms ≪ VAD hangover 500ms(숨길 게 없지만 여유).
+- **보너스(레버 C 품질)**: 분할 2파트 eval ≈ 통오디오 eval(동일 내용·prosody) →
+  >30s를 청크로 쪼개도 평가 품질 유지. **단 이는 latency가 아니라 긴-답변 커버리지용.**
+
+**남은 진짜 과제(latency 아님)**: ① 부팅 선warm 1줄(기동 더미 요청) ② 30s 캡 ↔ 긴 답변
+rolling window(품질/커버리지) ③ 라이브 VAD·스트리밍 캡처 파이프라인 엔지니어링.
+thesis 재프레이밍은 사용자와 확정(README/DECISIONS 갱신 대상).
+
+---
+
+<details><summary>아래는 스파이크 이전의 설계·프레이밍(이력 보존)</summary>
+
 **프레이밍(1차 원리, problem-solver 2026-05-24):** "오디오는 프리필 불가"는 **법칙이 아니라 검증 안 된 가정 3개의 합**이었다. 프리필 지연 이득 = "최종 오디오 KV를 턴 종료 *전에* 계산해 VAD 시점에 캐시돼 있게" 하는 것. 핵심 통찰: **프레임과 오디오는 대칭이다** — 시각 t에서 `[턴시작, t]` 오디오는 이미 도착·불변이고 모르는 건 미래뿐(프레임과 동일). "오디오 cold"가 성립하려면 ①Gemma 오디오 인코더가 클립 전체 global attention(앞 청크 토큰이 뒤에 의존) ②단일 블롭 전송 ③VAD trailing-silence lead time 무시 — 셋이 *동시에* 참이어야 하는데 ①은 미검증 가정, ②는 우리 선택, ③은 놓친 자원이다. Phase 3의 31.5배는 cold 현실을 회피(최종 오디오를 미리 쥠)한 best-case였다.
 
 **오디오 VAD 지연 레버 (MECE):**
@@ -122,6 +150,8 @@ best-case라 무효), ③ 정식 pytest 스위트는 현 단계에서 만들지 
 - 레버 A **미스** → 오디오 통째 cold 확정. 그래도 죽지 않음 — **레버 B+C 조합**으로 갈 수 있나 측정(짧은 윈도우를 침묵窗에 prefill). 그것도 안 되면 <0.5s 목표 수정을 사용자와 결정.
 
 증거 `.sisyphus/evidence/spike-cold-prefill.json`. GPU 위생 준수(`docker stop` + nvidia-smi).
+
+</details>
 
 ## Project-manager 스캐폴딩 (병행)
 
