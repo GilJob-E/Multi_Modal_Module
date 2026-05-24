@@ -26,7 +26,7 @@ docker run -d --name "$NAME" \
   "$IMAGE" \
   --model google/gemma-4-E4B-it \
   --max-model-len 8192 \
-  --limit-mm-per-prompt '{"image":4,"audio":4}' \
+  --limit-mm-per-prompt '{"image":16,"audio":4}' \
   --enable-prefix-caching \
   --dtype bfloat16
 
