@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.0.3, pluggy-1.6.0
+rootdir: /home/kio/workspace/gje/local-infer
+configfile: pyproject.toml
+plugins: anyio-4.13.0
+collected 8 items
+
+tests/test_native_audio.py ........                                      [100%]
+
+============================== 8 passed in 0.01s ===============================

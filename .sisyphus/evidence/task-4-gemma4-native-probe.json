@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "created_by": "local-infer/tools/probe_gemma4_vllm_sequence.py",
+  "generated_at": "2026-05-22T05:25:04.230726+00:00",
+  "status": "NO_GO",
+  "selected_model": null,
+  "startup_log": ".sisyphus/evidence/task-4-gemma4-vllm-startup.log",
+  "no_go_out": ".sisyphus/evidence/task-4-gemma4-no-go.md",
+  "candidate_order": [
+    "google/gemma-4-E4B-it",
+    "google/gemma-4-E2B-it"
+  ],
+  "candidates": [
+    {
+      "model": "google/gemma-4-E4B-it",
+      "container": "vllm-gemma4-e4b-task4-port8002",
+      "started_at": "2026-05-22T05:18:04.539408+00:00",
+      "command": "docker run -d --name vllm-gemma4-e4b-task4-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E4B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {\"video\":1,\"audio\":1,\"image\":4} --allowed-local-media-path /workspace/gje --dtype bfloat16",
+      "tensor_parallel_size": 1,
+      "readiness": "{\"object\":\"list\",\"data\":[{\"id\":\"google/gemma-4-E4B-it\",\"object\":\"model\",\"created\":1779427313,\"owned_by\":\"vllm\",\"root\":\"google/gemma-4-E4B-it\",\"parent\":null,\"max_model_len\":4096,\"permission\":[{\"id\":\"modelperm-87a0abf4cc186964\",\"object\":\"model_permission\",\"created\":1779427313,\"allow_create_engine\":false,\"allow_sampling\":true,\"allow_logprobs\":true,\"allow_search_indices\":false,\"allow_view\":true,\"allow_fine_tuning\":false,\"organization\":\"*\",\"group\":null,\"is_blocking\":false}]}]}",
+      "status": "probe-no-go",
+      "reason": "{\"probe_output\": \".sisyphus/evidence/task-4-gemma4-e4b-probe-raw.json\", \"summary\": {\"status\": \"FAIL\", \"probe_statuses\": {\"english_passphrase\": \"FAIL\", \"korean_passphrase\": \"FAIL\", \"no_audio_ablation\": \"FAIL\", \"beep_only\": \"FAIL\", \"av_sync\": \"FAIL\", \"cross_modal_event\": \"FAIL\"}, \"expect_no_audio\": false, \"event_response_ms\": 14.3, \"event_response_budget_ms\": 2000}, \"first_http_error\": {\"probe\": \"english_passphrase\", \"http_status\": 400, \"body_text\": \"{\\\"error\\\":{\\\"message\\\":\\\"Invalid or unsupported audio file.\\\",\\\"type\\\":\\\"BadRequestError\\\",\\\"param\\\":null,\\\"code\\\":400}}\"}, \"explicit_audio_transport\": \"input_audio base64 WAV\"}",
+      "raw_probe_output": ".sisyphus/evidence/task-4-gemma4-e4b-probe-raw.json",
+      "probe_summary": {
+        "status": "FAIL",
+        "probe_statuses": {
+          "english_passphrase": "FAIL",
+          "korean_passphrase": "FAIL",
+          "no_audio_ablation": "FAIL",
+          "beep_only": "FAIL",
+          "av_sync": "FAIL",
+          "cross_modal_event": "FAIL"
+        },
+        "expect_no_audio": false,
+        "event_response_ms": 14.3,
+        "event_response_budget_ms": 2000
+      },
+      "cleanup": "stop_exit=0, rm_exit=0"
+    },
+    {
+      "model": "google/gemma-4-E2B-it",
+      "container": "vllm-gemma4-e2b-task4-port8002",
+      "started_at": "2026-05-22T05:21:57.239493+00:00",
+      "command": "docker run -d --name vllm-gemma4-e2b-task4-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E2B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {\"video\":1,\"audio\":1,\"image\":4} --allowed-local-media-path /workspace/gje --dtype bfloat16",
+      "tensor_parallel_size": 1,
+      "readiness": "{\"object\":\"list\",\"data\":[{\"id\":\"google/gemma-4-E2B-it\",\"object\":\"model\",\"created\":1779427500,\"owned_by\":\"vllm\",\"root\":\"google/gemma-4-E2B-it\",\"parent\":null,\"max_model_len\":4096,\"permission\":[{\"id\":\"modelperm-80c92c9f121ecd07\",\"object\":\"model_permission\",\"created\":1779427500,\"allow_create_engine\":false,\"allow_sampling\":true,\"allow_logprobs\":true,\"allow_search_indices\":false,\"allow_view\":true,\"allow_fine_tuning\":false,\"organization\":\"*\",\"group\":null,\"is_blocking\":false}]}]}",
+      "status": "probe-no-go",
+      "reason": "{\"probe_output\": \".sisyphus/evidence/task-4-gemma4-e2b-probe-raw.json\", \"summary\": {\"status\": \"FAIL\", \"probe_statuses\": {\"english_passphrase\": \"FAIL\", \"korean_passphrase\": \"FAIL\", \"no_audio_ablation\": \"FAIL\", \"beep_only\": \"FAIL\", \"av_sync\": \"FAIL\", \"cross_modal_event\": \"FAIL\"}, \"expect_no_audio\": false, \"event_response_ms\": 15.0, \"event_response_budget_ms\": 2000}, \"first_http_error\": {\"probe\": \"english_passphrase\", \"http_status\": 400, \"body_text\": \"{\\\"error\\\":{\\\"message\\\":\\\"Invalid or unsupported audio file.\\\",\\\"type\\\":\\\"BadRequestError\\\",\\\"param\\\":null,\\\"code\\\":400}}\"}, \"explicit_audio_transport\": \"input_audio base64 WAV\"}",
+      "raw_probe_output": ".sisyphus/evidence/task-4-gemma4-e2b-probe-raw.json",
+      "probe_summary": {
+        "status": "FAIL",
+        "probe_statuses": {
+          "english_passphrase": "FAIL",
+          "korean_passphrase": "FAIL",
+          "no_audio_ablation": "FAIL",
+          "beep_only": "FAIL",
+          "av_sync": "FAIL",
+          "cross_modal_event": "FAIL"
+        },
+        "expect_no_audio": false,
+        "event_response_ms": 15.0,
+        "event_response_budget_ms": 2000
+      },
+      "cleanup": "stop_exit=0, rm_exit=0"
+    }
+  ],
+  "next_candidate_implication": "Gemma4 E4B and E2B did not pass explicit WAV native audio probes; downstream Task 5 should probe Qwen2.5-Omni."
+}

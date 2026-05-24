@@ -1,0 +1,62 @@
+
+## Task 4 Gemma4 vLLM Probe Sequence
+started_at=2026-05-22T05:18:04.507227+00:00
+models=['google/gemma-4-E4B-it', 'google/gemma-4-E2B-it']
+port=8002
+host_bind=127.0.0.1 only
+fixtures=.sisyphus/evidence/audio-fixtures
+readiness_timeout_s=3600
+readiness_out=.sisyphus/evidence/vid0033-gemma4-readiness.json
+HF_TOKEN source: environment
+vLLM image selected: vllm/vllm-openai:nightly
+
+## Candidate google/gemma-4-E4B-it
+
+## google/gemma-4-E4B-it TP=1
+launch_command=docker run -d --name vllm-gemma4-e4b-task4-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E4B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {"video":1,"audio":1,"image":4} --allowed-local-media-path /workspace/gje --dtype bfloat16
+container vllm-gemma4-e4b-task4-port8002 absent before cleanup
+prelaunch cleanup for task container: container vllm-gemma4-e4b-task4-port8002 absent before cleanup
+$ docker run -d --name vllm-gemma4-e4b-task4-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E4B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {"video":1,"audio":1,"image":4} --allowed-local-media-path /workspace/gje --dtype bfloat16
+exit_code=0
+stdout:
+88bc28590c5933a315996c85ae10ce29a350fd2493b228b5fee91cf1da09df52
+readiness /v1/models: HTTP 200
+{"object":"list","data":[{"id":"google/gemma-4-E4B-it","object":"model","created":1779427313,"owned_by":"vllm","root":"google/gemma-4-E4B-it","parent":null,"max_model_len":4096,"permission":[{"id":"modelperm-87a0abf4cc186964","object":"model_permission","created":1779427313,"allow_create_engine":false,"allow_sampling":true,"allow_logprobs":true,"allow_search_indices":false,"allow_view":true,"allow_fine_tuning":false,"organization":"*","group":null,"is_blocking":false}]}]}
+$ /usr/bin/python3 local-infer/tools/probe_native_audio.py --base-url http://localhost:8002 --model google/gemma-4-E4B-it --fixtures .sisyphus/evidence/audio-fixtures --out .sisyphus/evidence/task-4-gemma4-e4b-probe-raw.json
+exit_code=1
+stdout:
+{"out": ".sisyphus/evidence/task-4-gemma4-e4b-probe-raw.json", "status": "FAIL"}
+$ docker stop vllm-gemma4-e4b-task4-port8002
+exit_code=0
+stdout:
+vllm-gemma4-e4b-task4-port8002
+$ docker rm vllm-gemma4-e4b-task4-port8002
+exit_code=0
+stdout:
+vllm-gemma4-e4b-task4-port8002
+
+## Candidate google/gemma-4-E2B-it
+
+## google/gemma-4-E2B-it TP=1
+launch_command=docker run -d --name vllm-gemma4-e2b-task4-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E2B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {"video":1,"audio":1,"image":4} --allowed-local-media-path /workspace/gje --dtype bfloat16
+container vllm-gemma4-e2b-task4-port8002 absent before cleanup
+prelaunch cleanup for task container: container vllm-gemma4-e2b-task4-port8002 absent before cleanup
+$ docker run -d --name vllm-gemma4-e2b-task4-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E2B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {"video":1,"audio":1,"image":4} --allowed-local-media-path /workspace/gje --dtype bfloat16
+exit_code=0
+stdout:
+2e4a0f3cf6a88cd7184d1cfb3a85a18a3129ff5f3ac68e42994ead4f1e3a3fdd
+readiness /v1/models: HTTP 200
+{"object":"list","data":[{"id":"google/gemma-4-E2B-it","object":"model","created":1779427500,"owned_by":"vllm","root":"google/gemma-4-E2B-it","parent":null,"max_model_len":4096,"permission":[{"id":"modelperm-80c92c9f121ecd07","object":"model_permission","created":1779427500,"allow_create_engine":false,"allow_sampling":true,"allow_logprobs":true,"allow_search_indices":false,"allow_view":true,"allow_fine_tuning":false,"organization":"*","group":null,"is_blocking":false}]}]}
+$ /usr/bin/python3 local-infer/tools/probe_native_audio.py --base-url http://localhost:8002 --model google/gemma-4-E2B-it --fixtures .sisyphus/evidence/audio-fixtures --out .sisyphus/evidence/task-4-gemma4-e2b-probe-raw.json
+exit_code=1
+stdout:
+{"out": ".sisyphus/evidence/task-4-gemma4-e2b-probe-raw.json", "status": "FAIL"}
+$ docker stop vllm-gemma4-e2b-task4-port8002
+exit_code=0
+stdout:
+vllm-gemma4-e2b-task4-port8002
+$ docker rm vllm-gemma4-e2b-task4-port8002
+exit_code=0
+stdout:
+vllm-gemma4-e2b-task4-port8002
+result=NO-GO; all task containers stopped or absent

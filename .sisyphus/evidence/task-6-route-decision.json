@@ -1,0 +1,226 @@
+{
+  "schema_version": 2,
+  "generated_at": "2026-05-22T06:04:08Z",
+  "task": "Task 6 - Lock the Native Route or Trigger Degraded Contingency",
+  "selected_route": "native-no-go",
+  "native_route_status": "no-go",
+  "model_id": null,
+  "engine": null,
+  "payload_shape": {
+    "selected_native_payload": null,
+    "reason": "No native route passed the required probe sequence; downstream native app integration is unavailable unless a later task explicitly implements the degraded ASR contingency.",
+    "failed_candidate_payloads": {
+      "gemma4_e4b": "vLLM OpenAI-compatible multimodal request using explicit input_audio base64 WAV payloads with text prompts; model started with --limit-mm-per-prompt {\"video\":1,\"audio\":1,\"image\":4}.",
+      "gemma4_e2b": "vLLM OpenAI-compatible multimodal request using explicit input_audio base64 WAV payloads with text prompts; model started with --limit-mm-per-prompt {\"video\":1,\"audio\":1,\"image\":4}.",
+      "qwen2_5_omni": "Qwen typed content list containing explicit WAV audio local path, muted MP4 video local path, and prompt text; transcript_text_used=false, remote_inference_used=false, use_audio_in_video=false."
+    }
+  },
+  "fallback_enabled": true,
+  "fallback": {
+    "type": "degraded local ASR contingency",
+    "status": "enabled_for_task_10_only",
+    "native_success": false,
+    "statement": "ASR fallback is a degraded local contingency and is not native success."
+  },
+  "decision_algorithm": [
+    {
+      "priority": 1,
+      "route": "gemma4-e4b",
+      "question": "Gemma4 E4B passed?",
+      "passed": false,
+      "decision": "continue_to_gemma4_e2b",
+      "evidence": [
+        ".sisyphus/evidence/task-4-gemma4-native-probe.json",
+        ".sisyphus/evidence/task-4-gemma4-no-go.md"
+      ]
+    },
+    {
+      "priority": 2,
+      "route": "gemma4-e2b",
+      "question": "Gemma4 E2B passed?",
+      "passed": false,
+      "decision": "continue_to_qwen2.5-omni",
+      "evidence": [
+        ".sisyphus/evidence/task-4-gemma4-native-probe.json",
+        ".sisyphus/evidence/task-4-gemma4-no-go.md"
+      ]
+    },
+    {
+      "priority": 3,
+      "route": "qwen2.5-omni",
+      "question": "Qwen native passed?",
+      "passed": false,
+      "decision": "select_native_no_go",
+      "reason": "Primary GPTQ failed to load locally and alternate 3B had sequence_summary.all_required_passed=false.",
+      "evidence": [
+        ".sisyphus/evidence/task-5-qwen-native-probe.json",
+        ".sisyphus/evidence/task-5-qwen-no-go.md"
+      ]
+    },
+    {
+      "priority": 4,
+      "route": "native-no-go",
+      "selected": true,
+      "fallback_enabled": true,
+      "fallback_is_native_success": false
+    }
+  ],
+  "failed_routes": [
+    {
+      "route": "gemma4-e4b",
+      "status": "probe-no-go",
+      "model_id": "google/gemma-4-E4B-it",
+      "engine": "vLLM OpenAI-compatible server, vllm/vllm-openai:nightly",
+      "port": "127.0.0.1:8002 -> container 8000",
+      "payload_shape": {
+        "server": "OpenAI-compatible multimodal chat/completions route",
+        "explicit_audio_transport": "input_audio base64 WAV",
+        "limit_mm_per_prompt": {
+          "video": 1,
+          "audio": 1,
+          "image": 4
+        },
+        "intended_media": [
+          "audio",
+          "video",
+          "image",
+          "text"
+        ]
+      },
+      "launch_command": "docker run -d --name vllm-gemma4-e4b-task4-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E4B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {\"video\":1,\"audio\":1,\"image\":4} --allowed-local-media-path /workspace/gje --dtype bfloat16",
+      "readiness": "HTTP 200 /v1/models",
+      "probe_scores": {
+        "english_passphrase": "FAIL",
+        "korean_passphrase": "FAIL",
+        "no_audio_ablation": "FAIL",
+        "beep_only": "FAIL",
+        "av_sync": "FAIL",
+        "cross_modal_event": "FAIL",
+        "event_response_ms": 14.3,
+        "event_response_budget_ms": 2000,
+        "all_required_passed": false
+      },
+      "failure_reason": "The server reached /v1/models, but all six explicit input_audio base64 WAV probes failed; the first HTTP error was 400 Invalid or unsupported audio file.",
+      "evidence": [
+        ".sisyphus/evidence/task-4-gemma4-native-probe.json",
+        ".sisyphus/evidence/task-4-gemma4-no-go.md"
+      ],
+      "startup_log": ".sisyphus/evidence/task-4-gemma4-vllm-startup.log"
+    },
+    {
+      "route": "gemma4-e2b",
+      "status": "probe-no-go",
+      "model_id": "google/gemma-4-E2B-it",
+      "engine": "vLLM OpenAI-compatible server, vllm/vllm-openai:nightly",
+      "port": "127.0.0.1:8002 -> container 8000",
+      "payload_shape": {
+        "server": "OpenAI-compatible multimodal chat/completions route",
+        "explicit_audio_transport": "input_audio base64 WAV",
+        "limit_mm_per_prompt": {
+          "video": 1,
+          "audio": 1,
+          "image": 4
+        },
+        "intended_media": [
+          "audio",
+          "video",
+          "image",
+          "text"
+        ]
+      },
+      "launch_command": "docker run -d --name vllm-gemma4-e2b-task4-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E2B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {\"video\":1,\"audio\":1,\"image\":4} --allowed-local-media-path /workspace/gje --dtype bfloat16",
+      "readiness": "HTTP 200 /v1/models",
+      "probe_scores": {
+        "english_passphrase": "FAIL",
+        "korean_passphrase": "FAIL",
+        "no_audio_ablation": "FAIL",
+        "beep_only": "FAIL",
+        "av_sync": "FAIL",
+        "cross_modal_event": "FAIL",
+        "event_response_ms": 15.0,
+        "event_response_budget_ms": 2000,
+        "all_required_passed": false
+      },
+      "failure_reason": "The server reached /v1/models, but all six explicit input_audio base64 WAV probes failed; the first HTTP error was 400 Invalid or unsupported audio file.",
+      "evidence": [
+        ".sisyphus/evidence/task-4-gemma4-native-probe.json",
+        ".sisyphus/evidence/task-4-gemma4-no-go.md"
+      ],
+      "startup_log": ".sisyphus/evidence/task-4-gemma4-vllm-startup.log"
+    },
+    {
+      "route": "qwen2.5-omni-primary-gptq",
+      "status": "load-no-go",
+      "model_id": "Qwen/Qwen2.5-Omni-7B-GPTQ-Int4",
+      "engine": "Transformers + qwen-omni-utils local offline inference",
+      "port": null,
+      "payload_shape": {
+        "intended_message_shape": "Qwen typed content list",
+        "intended_media_types": [
+          "audio",
+          "video",
+          "text"
+        ],
+        "native_media_direct": true,
+        "transcript_text_used": false,
+        "remote_inference_used": false
+      },
+      "launch_command": "uv run --offline --with torch --with torchvision --with transformers --with qwen-omni-utils --with accelerate --with decord python local-infer/tools/probe_qwen_omni_native.py --fixtures .sisyphus/evidence/audio-fixtures --out .sisyphus/evidence/task-5-qwen-native-probe.json",
+      "probe_scores": null,
+      "failure_reason": "Cached primary GPTQ snapshot existed, but local initialization failed: ImportError Loading a GPTQ quantized model requires optimum (`pip install optimum`).",
+      "evidence": [
+        ".sisyphus/evidence/task-5-qwen-native-probe.json",
+        ".sisyphus/evidence/task-5-qwen-no-go.md"
+      ]
+    },
+    {
+      "route": "qwen2.5-omni-3b-alternate",
+      "status": "probe-no-go",
+      "model_id": "Qwen/Qwen2.5-Omni-3B",
+      "engine": "Transformers + qwen-omni-utils local offline inference",
+      "port": null,
+      "payload_shape": {
+        "message_shape": "Qwen typed content list",
+        "media_types": [
+          "audio",
+          "video",
+          "text"
+        ],
+        "audio_transport": "typed_local_path_direct_media WAV",
+        "video_transport": "typed_local_path_direct_media muted MP4",
+        "native_media_direct": true,
+        "transcript_text_used": false,
+        "remote_inference_used": false,
+        "use_audio_in_video": false
+      },
+      "launch_command": "uv run --offline --with torch --with torchvision --with transformers --with qwen-omni-utils --with accelerate --with decord python local-infer/tools/probe_qwen_omni_native.py --fixtures .sisyphus/evidence/audio-fixtures --out .sisyphus/evidence/task-5-qwen-native-probe.json",
+      "probe_scores": {
+        "audio_positive": "FAIL",
+        "no_audio_ablation": "FAIL",
+        "beep_only": "PASS",
+        "korean_phrase": "FAIL",
+        "av_sync": "PASS",
+        "cross_modal_event": "PASS",
+        "event_response_ms": 1113.692,
+        "event_response_budget_ms": 2000,
+        "all_required_passed": false,
+        "selected_model": null
+      },
+      "failure_reason": "The alternate 3B model ran locally with direct WAV audio plus muted MP4 video, but required audio-positive, no-audio ablation, and Korean phrase probes failed. Cross-modal event passed within budget, but all required probes did not pass, so Qwen is not selected.",
+      "evidence": [
+        ".sisyphus/evidence/task-5-qwen-native-probe.json",
+        ".sisyphus/evidence/task-5-qwen-no-go.md"
+      ]
+    }
+  ],
+  "evidence_references": [
+    ".sisyphus/evidence/task-4-gemma4-native-probe.json",
+    ".sisyphus/evidence/task-4-gemma4-no-go.md",
+    ".sisyphus/evidence/task-5-qwen-native-probe.json",
+    ".sisyphus/evidence/task-5-qwen-no-go.md"
+  ],
+  "supporting_evidence_references": [
+    ".sisyphus/evidence/task-4-gemma4-vllm-startup.log"
+  ],
+  "downstream_implication": "Task 7 native route integration is blocked/unavailable for native success; Task 10 degraded local ASR contingency is enabled as non-native fallback only."
+}

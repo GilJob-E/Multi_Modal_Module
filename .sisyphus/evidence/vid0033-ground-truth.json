@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-21T18:23:27Z",
+  "artifact_purpose": "diagnostic reference ground truth only; not native model proof and not a success artifact",
+  "fixture_label": "vid_0033.mp4",
+  "source_path": "/home/kio/workspace/gje/vid_0033.mp4",
+  "source_container_path": "/workspace/gje/vid_0033.mp4",
+  "source_file_url": "file:///workspace/gje/vid_0033.mp4",
+  "source_sha256": "139e6b4cc725b0a4836baffde1e811b5cf41271e2a5ac0fa6f4dec41645cd4a8",
+  "diagnostic_only": true,
+  "ground_truth_is_not_native_success": true,
+  "source_metadata_path": ".sisyphus/evidence/vid0033-media-metadata.json",
+  "supporting_evidence_dir": ".sisyphus/evidence/vid0033-ground-truth/",
+  "method_notes": [
+    "Visual observations are based on ffmpeg-extracted frames from the real fixture only.",
+    "Audio observations are based on local ffmpeg waveform, silencedetect, and RMS diagnostics only.",
+    "No cloud transcription, hosted ASR, Gemma4 response, Qwen response, synthetic fixture, or fallback endpoint was used.",
+    "Exact speech text is intentionally not asserted; audio checks use speech/activity cue classes and measured silence/activity patterns."
+  ],
+  "visual_checks": [
+    {
+      "id": "visual_002000_speaker_centered",
+      "timestamp_ms": 2000,
+      "expected": "A young adult man with glasses and a dark collared shirt is centered in frame, facing the camera against a plain light-colored indoor wall; no major background objects dominate the scene.",
+      "supporting_evidence_path": ".sisyphus/evidence/vid0033-ground-truth/frame_002000ms.jpg",
+      "confidence": "high"
+    },
+    {
+      "id": "visual_020000_eyes_closed_or_downcast",
+      "timestamp_ms": 20000,
+      "expected": "The same man remains facing the camera; his eyes appear closed or nearly closed, with otherwise neutral posture. Treat the eye state as approximate rather than identity proof.",
+      "supporting_evidence_path": ".sisyphus/evidence/vid0033-ground-truth/frame_020000ms.jpg",
+      "confidence": "medium"
+    },
+    {
+      "id": "visual_030000_possible_speaking_mouth_open",
+      "timestamp_ms": 30000,
+      "expected": "The same man remains seated or standing still, facing the camera; his mouth is slightly open, consistent with possible speech but not proof of exact words.",
+      "supporting_evidence_path": ".sisyphus/evidence/vid0033-ground-truth/frame_030000ms.jpg",
+      "confidence": "medium"
+    },
+    {
+      "id": "visual_048000_room_edges_visible",
+      "timestamp_ms": 48000,
+      "expected": "The man is still facing the camera near the end of the clip; the plain white walls and wall switches/outlets are visible at the side of the frame.",
+      "supporting_evidence_path": ".sisyphus/evidence/vid0033-ground-truth/frame_048000ms.jpg",
+      "confidence": "high"
+    }
+  ],
+  "audio_checks": [
+    {
+      "id": "audio_012000_017000_sustained_speech_like_activity",
+      "start_ms": 12000,
+      "end_ms": 17000,
+      "expected": "Local RMS diagnostics show sustained non-silent audio activity in this window, with 1-second RMS values around -22.83 to -27.25 dBFS; classify as speech-like audio presence only, without asserting transcript text.",
+      "supporting_evidence_path": ".sisyphus/evidence/vid0033-ground-truth/audio_active_012000_017000ms.wav",
+      "diagnostic_paths": [
+        ".sisyphus/evidence/vid0033-ground-truth/audio_segment_rms.json",
+        ".sisyphus/evidence/vid0033-ground-truth/audio_waveform.png"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "audio_048176_050286_quiet_tail",
+      "start_ms": 48176,
+      "end_ms": 50286,
+      "expected": "ffmpeg silencedetect reports a quiet or silent tail from about 48.176s to the end of the file; this should be treated as an audio-level cue, not a content transcript.",
+      "supporting_evidence_path": ".sisyphus/evidence/vid0033-ground-truth/audio_quiet_tail_048000_050000ms.wav",
+      "diagnostic_paths": [
+        ".sisyphus/evidence/vid0033-ground-truth/audio_silencedetect.txt",
+        ".sisyphus/evidence/vid0033-ground-truth/audio_segment_rms.json"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "cross_modal_checks": [
+    {
+      "id": "cross_modal_012000_017000_visible_speaker_with_audio_activity",
+      "start_ms": 12000,
+      "end_ms": 17000,
+      "expected": "The clip should show the same front-facing man in the otherwise stable indoor scene while local audio diagnostics indicate sustained non-silent, speech-like activity; this requires tying visible speaker presence to concurrent audio activity, without inventing spoken words.",
+      "visual_evidence_paths": [
+        ".sisyphus/evidence/vid0033-ground-truth/frame_010000ms.jpg",
+        ".sisyphus/evidence/vid0033-ground-truth/thumbnail_contact_sheet.jpg"
+      ],
+      "audio_evidence_paths": [
+        ".sisyphus/evidence/vid0033-ground-truth/audio_active_012000_017000ms.wav",
+        ".sisyphus/evidence/vid0033-ground-truth/audio_segment_rms.json",
+        ".sisyphus/evidence/vid0033-ground-truth/audio_waveform.png"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "cross_modal_048000_visible_person_with_quiet_tail",
+      "start_ms": 48000,
+      "end_ms": 50286,
+      "expected": "Near the end, the man remains visible facing the camera while audio diagnostics show a quiet/silent tail beginning around 48.176s; this verifies simultaneous visual continuity and reduced audio activity.",
+      "visual_evidence_paths": [
+        ".sisyphus/evidence/vid0033-ground-truth/frame_048000ms.jpg"
+      ],
+      "audio_evidence_paths": [
+        ".sisyphus/evidence/vid0033-ground-truth/audio_silencedetect.txt",
+        ".sisyphus/evidence/vid0033-ground-truth/audio_quiet_tail_048000_050000ms.wav"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "evidence_inventory": {
+    "source_ffprobe": ".sisyphus/evidence/vid0033-ground-truth/source_ffprobe.json",
+    "contact_sheet": ".sisyphus/evidence/vid0033-ground-truth/thumbnail_contact_sheet.jpg",
+    "frames": [
+      ".sisyphus/evidence/vid0033-ground-truth/frame_002000ms.jpg",
+      ".sisyphus/evidence/vid0033-ground-truth/frame_010000ms.jpg",
+      ".sisyphus/evidence/vid0033-ground-truth/frame_020000ms.jpg",
+      ".sisyphus/evidence/vid0033-ground-truth/frame_030000ms.jpg",
+      ".sisyphus/evidence/vid0033-ground-truth/frame_040000ms.jpg",
+      ".sisyphus/evidence/vid0033-ground-truth/frame_048000ms.jpg"
+    ],
+    "audio": [
+      ".sisyphus/evidence/vid0033-ground-truth/audio_mono_16khz.wav",
+      ".sisyphus/evidence/vid0033-ground-truth/audio_active_012000_017000ms.wav",
+      ".sisyphus/evidence/vid0033-ground-truth/audio_quiet_tail_048000_050000ms.wav",
+      ".sisyphus/evidence/vid0033-ground-truth/audio_waveform.png",
+      ".sisyphus/evidence/vid0033-ground-truth/audio_segment_rms.json",
+      ".sisyphus/evidence/vid0033-ground-truth/audio_silencedetect.txt",
+      ".sisyphus/evidence/vid0033-ground-truth/audio_rms_levels.txt"
+    ]
+  }
+}

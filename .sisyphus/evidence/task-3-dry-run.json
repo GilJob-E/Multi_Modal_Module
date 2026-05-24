@@ -1,0 +1,546 @@
+{
+  "schema_version": 1,
+  "created_by": "local-infer/tools/probe_native_audio.py",
+  "dry_run": true,
+  "expect_no_audio": false,
+  "base_url": "http://localhost:8002",
+  "model": "google/gemma-4-E4B-it",
+  "fixtures_dir": ".sisyphus/evidence/audio-fixtures",
+  "fixture_manifest_sha256": "22e3114f20613d2474f3d1477d10e0b98c16c839338bccdc2c6b474682a437ed",
+  "required_probes": [
+    "english_passphrase",
+    "korean_passphrase",
+    "no_audio_ablation",
+    "beep_only",
+    "av_sync",
+    "cross_modal_event"
+  ],
+  "summary": {
+    "status": "PASS",
+    "probe_statuses": {
+      "english_passphrase": "PASS",
+      "korean_passphrase": "PASS",
+      "no_audio_ablation": "PASS",
+      "beep_only": "PASS",
+      "av_sync": "PASS",
+      "cross_modal_event": "PASS"
+    },
+    "expect_no_audio": false,
+    "event_response_ms": null,
+    "event_response_budget_ms": 2000
+  },
+  "probes": [
+    {
+      "key": "english_passphrase",
+      "status": "PASS",
+      "fixture_files": {
+        "english_passphrase.wav": {
+          "path": "english_passphrase.wav",
+          "size_bytes": 102444,
+          "sha256": "086cae695de9a1d62deac4d99d585ea3372d0b35a59ac4fcd8ee897c81f60468"
+        },
+        "english_passphrase.mp4": {
+          "path": "english_passphrase.mp4",
+          "size_bytes": 2023,
+          "sha256": "f51bda79e26bd8359d80275dc731aff28e98f88b5ce32b4a44d12d1384d22996"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E4B-it",
+        "fixture_key": "english_passphrase",
+        "payload_sha256": "e5d007bf4ed5fb4206429689a78ca2a7954481d9d1b1a12ab21944587cb44cdf",
+        "payload_size_bytes": 79630,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 76460
+          },
+          {
+            "type": "text",
+            "chars": 165
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "native",
+          "audio",
+          "probe",
+          "green"
+        ],
+        "negative_substrings": [
+          "silent",
+          "no audio",
+          "beep only"
+        ],
+        "event_timing": {}
+      },
+      "raw_model_answer": null,
+      "raw_response_metadata": null,
+      "normalized": {
+        "status": "PASS",
+        "mode": "dry_run_validation",
+        "passed_checks": true,
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": []
+      },
+      "timings_ms": {
+        "request_total_ms": null,
+        "first_response_ms": null
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": null
+    },
+    {
+      "key": "korean_passphrase",
+      "status": "PASS",
+      "fixture_files": {
+        "korean_passphrase.wav": {
+          "path": "korean_passphrase.wav",
+          "size_bytes": 108844,
+          "sha256": "7cc7c0489babe3b3a7280469968ce7bd753401be8f92eaf09dcead81407350af"
+        },
+        "korean_passphrase.mp4": {
+          "path": "korean_passphrase.mp4",
+          "size_bytes": 2058,
+          "sha256": "c936f0378c9a71477defd493d724b6f29db93a5913d321c391f1905807aefef9"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E4B-it",
+        "fixture_key": "korean_passphrase",
+        "payload_sha256": "23459db3609c41673830e93a9641c64ec3c19c64a1845619d852536dedd10d66",
+        "payload_size_bytes": 148282,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 145128
+          },
+          {
+            "type": "text",
+            "chars": 105
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "하늘",
+          "아"
+        ],
+        "negative_substrings": [
+          "silent",
+          "no audio",
+          "beep only"
+        ],
+        "event_timing": {}
+      },
+      "raw_model_answer": null,
+      "raw_response_metadata": null,
+      "normalized": {
+        "status": "PASS",
+        "mode": "dry_run_validation",
+        "passed_checks": true,
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": []
+      },
+      "timings_ms": {
+        "request_total_ms": null,
+        "first_response_ms": null
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": null
+    },
+    {
+      "key": "no_audio_ablation",
+      "status": "PASS",
+      "fixture_files": {
+        "no_audio_ablation.wav": {
+          "path": "no_audio_ablation.wav",
+          "size_bytes": 102444,
+          "sha256": "1be7881ee2c5792b88b9f69f38fa4063d9ee110fdf765a04e4e984e590311ed3"
+        },
+        "no_audio_ablation.mp4": {
+          "path": "no_audio_ablation.mp4",
+          "size_bytes": 2023,
+          "sha256": "f51bda79e26bd8359d80275dc731aff28e98f88b5ce32b4a44d12d1384d22996"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E4B-it",
+        "fixture_key": "no_audio_ablation",
+        "payload_sha256": "7947122cf3c91d769bc78199ae102112b2ddbb82b4d5361e11aae4c190f0a9e3",
+        "payload_size_bytes": 139700,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 136592
+          },
+          {
+            "type": "text",
+            "chars": 103
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "silent",
+          "no audio"
+        ],
+        "negative_substrings": [
+          "native audio probe green",
+          "하늘",
+          "beep"
+        ],
+        "event_timing": {}
+      },
+      "raw_model_answer": null,
+      "raw_response_metadata": null,
+      "normalized": {
+        "status": "PASS",
+        "mode": "dry_run_validation",
+        "passed_checks": true,
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": []
+      },
+      "timings_ms": {
+        "request_total_ms": null,
+        "first_response_ms": null
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": null
+    },
+    {
+      "key": "beep_only",
+      "status": "PASS",
+      "fixture_files": {
+        "beep_only.wav": {
+          "path": "beep_only.wav",
+          "size_bytes": 89644,
+          "sha256": "4cbdd92d990ef7e52f482bc2f97136fd7ea0d419cd3f8f01ffbb46480cb0bdb2"
+        },
+        "beep_only.mp4": {
+          "path": "beep_only.mp4",
+          "size_bytes": 1946,
+          "sha256": "f1dbae021042f964229c5cd2831c3aa7b9920cce4f6f95c225366b2afeeb8a0a"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E4B-it",
+        "fixture_key": "beep_only",
+        "payload_sha256": "43ad3db568d02a9b71538e2dc8fcb250e5d85e4aa851d120ffbf05d177cbd45b",
+        "payload_size_bytes": 122567,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 119528
+          },
+          {
+            "type": "text",
+            "chars": 138
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "beep",
+          "tone",
+          "non-speech"
+        ],
+        "negative_substrings": [
+          "native audio probe green",
+          "하늘"
+        ],
+        "event_timing": {}
+      },
+      "raw_model_answer": null,
+      "raw_response_metadata": null,
+      "normalized": {
+        "status": "PASS",
+        "mode": "dry_run_validation",
+        "passed_checks": true,
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": []
+      },
+      "timings_ms": {
+        "request_total_ms": null,
+        "first_response_ms": null
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": null
+    },
+    {
+      "key": "av_sync",
+      "status": "PASS",
+      "fixture_files": {
+        "av_sync.wav": {
+          "path": "av_sync.wav",
+          "size_bytes": 108844,
+          "sha256": "fcb1435d32cdb236a628255c6993bfd3c9585241e157cfff0c97379a01526bda"
+        },
+        "av_sync.mp4": {
+          "path": "av_sync.mp4",
+          "size_bytes": 2056,
+          "sha256": "c29d58bd4319667b9aff0407765d318c39d9e546e642b34aaf70a72d8a5de9a9"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E4B-it",
+        "fixture_key": "av_sync",
+        "payload_sha256": "593a963cc6bf5d1660985500a5f7200fd5f607ce1e48902ca56adfb97ace75aa",
+        "payload_size_bytes": 148334,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 145128
+          },
+          {
+            "type": "text",
+            "chars": 157
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "sync",
+          "align",
+          "flash"
+        ],
+        "negative_substrings": [
+          "silent",
+          "no audio"
+        ],
+        "event_timing": {
+          "audio_beep_ms": [
+            1000,
+            2200
+          ],
+          "visual_flash_ms": [
+            1000,
+            2200
+          ],
+          "max_alignment_error_ms": 120
+        }
+      },
+      "raw_model_answer": null,
+      "raw_response_metadata": null,
+      "normalized": {
+        "status": "PASS",
+        "mode": "dry_run_validation",
+        "passed_checks": true,
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": []
+      },
+      "timings_ms": {
+        "request_total_ms": null,
+        "first_response_ms": null
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": null
+    },
+    {
+      "key": "cross_modal_event",
+      "status": "PASS",
+      "fixture_files": {
+        "cross_modal_event.wav": {
+          "path": "cross_modal_event.wav",
+          "size_bytes": 134444,
+          "sha256": "9ad5d0dbdaf9a3e6efc4ece36950675a8c03c132de83adbf60aa0aad4e95c227"
+        },
+        "cross_modal_event.mp4": {
+          "path": "cross_modal_event.mp4",
+          "size_bytes": 2091,
+          "sha256": "6f2a0e51d0dc8b7c7168998abac58cbaa515604898031283fdf6baadcd8b319b"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E4B-it",
+        "fixture_key": "cross_modal_event",
+        "payload_sha256": "7b02613df905418223b745afd974a213ca7ea49b9cee6fb44aa49b90da57c760",
+        "payload_size_bytes": 182578,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 179260
+          },
+          {
+            "type": "text",
+            "chars": 225
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "sky",
+          "look",
+          "ah",
+          "event"
+        ],
+        "negative_substrings": [
+          "silent",
+          "no audio",
+          "audio only"
+        ],
+        "event_timing": {
+          "target_event_start_ms": 1600,
+          "target_event_end_ms": 2600,
+          "audio_cue_ms": 1700,
+          "visual_cue_ms": 1600,
+          "response_budget_ms": 2000
+        }
+      },
+      "raw_model_answer": null,
+      "raw_response_metadata": null,
+      "normalized": {
+        "status": "PASS",
+        "mode": "dry_run_validation",
+        "passed_checks": true,
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": []
+      },
+      "timings_ms": {
+        "request_total_ms": null,
+        "first_response_ms": null
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": 2000
+    }
+  ]
+}

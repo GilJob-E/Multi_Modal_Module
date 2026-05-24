@@ -1,0 +1,4 @@
+guardrail_file=src/local_infer/native_audio.py
+forbidden_terms=['audio_analysis', 'transcript', 'asr', 'vad', 'vocal_cue', 'silence_detected']
+found_terms=[]
+result=PASS

@@ -1,0 +1,9 @@
+{
+  "error": "source file not found: /home/kio/workspace/gje/missing.mp4",
+  "native_endpoints": {
+    "generate": "/v1/native/sessions/native-smoke-vid0033/generate",
+    "windows": "/v1/native/sessions/native-smoke-vid0033/windows"
+  },
+  "ok": false,
+  "source_path": "/home/kio/workspace/gje/missing.mp4"
+}

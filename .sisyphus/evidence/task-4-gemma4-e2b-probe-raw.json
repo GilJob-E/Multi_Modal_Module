@@ -1,0 +1,570 @@
+{
+  "schema_version": 1,
+  "created_by": "local-infer/tools/probe_native_audio.py",
+  "dry_run": false,
+  "expect_no_audio": false,
+  "base_url": "http://localhost:8002",
+  "model": "google/gemma-4-E2B-it",
+  "fixtures_dir": ".sisyphus/evidence/audio-fixtures",
+  "fixture_manifest_sha256": "22e3114f20613d2474f3d1477d10e0b98c16c839338bccdc2c6b474682a437ed",
+  "required_probes": [
+    "english_passphrase",
+    "korean_passphrase",
+    "no_audio_ablation",
+    "beep_only",
+    "av_sync",
+    "cross_modal_event"
+  ],
+  "summary": {
+    "status": "FAIL",
+    "probe_statuses": {
+      "english_passphrase": "FAIL",
+      "korean_passphrase": "FAIL",
+      "no_audio_ablation": "FAIL",
+      "beep_only": "FAIL",
+      "av_sync": "FAIL",
+      "cross_modal_event": "FAIL"
+    },
+    "expect_no_audio": false,
+    "event_response_ms": 15.0,
+    "event_response_budget_ms": 2000
+  },
+  "probes": [
+    {
+      "key": "english_passphrase",
+      "status": "FAIL",
+      "fixture_files": {
+        "english_passphrase.wav": {
+          "path": "english_passphrase.wav",
+          "size_bytes": 102444,
+          "sha256": "086cae695de9a1d62deac4d99d585ea3372d0b35a59ac4fcd8ee897c81f60468"
+        },
+        "english_passphrase.mp4": {
+          "path": "english_passphrase.mp4",
+          "size_bytes": 2023,
+          "sha256": "f51bda79e26bd8359d80275dc731aff28e98f88b5ce32b4a44d12d1384d22996"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E2B-it",
+        "fixture_key": "english_passphrase",
+        "payload_sha256": "22279ecd33e88b5e5ba723650f7caa01eb37016993b798232862ddb27aa8fc91",
+        "payload_size_bytes": 139762,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 136592
+          },
+          {
+            "type": "text",
+            "chars": 165
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "native",
+          "audio",
+          "probe",
+          "green"
+        ],
+        "negative_substrings": [
+          "silent",
+          "no audio",
+          "beep only"
+        ],
+        "event_timing": {}
+      },
+      "raw_model_answer": "",
+      "raw_response_metadata": {
+        "http_status": 400,
+        "error": "http_error",
+        "body_text": "{\"error\":{\"message\":\"Invalid or unsupported audio file.\",\"type\":\"BadRequestError\",\"param\":null,\"code\":400}}"
+      },
+      "normalized": {
+        "status": "FAIL",
+        "mode": "model_response",
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": [],
+        "expect_no_audio_applied": false
+      },
+      "timings_ms": {
+        "first_response_ms": 29.4,
+        "request_total_ms": 29.4
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": null
+    },
+    {
+      "key": "korean_passphrase",
+      "status": "FAIL",
+      "fixture_files": {
+        "korean_passphrase.wav": {
+          "path": "korean_passphrase.wav",
+          "size_bytes": 108844,
+          "sha256": "7cc7c0489babe3b3a7280469968ce7bd753401be8f92eaf09dcead81407350af"
+        },
+        "korean_passphrase.mp4": {
+          "path": "korean_passphrase.mp4",
+          "size_bytes": 2058,
+          "sha256": "c936f0378c9a71477defd493d724b6f29db93a5913d321c391f1905807aefef9"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E2B-it",
+        "fixture_key": "korean_passphrase",
+        "payload_sha256": "f8ef081b9d18ebf352f03d67f7db07565f740fd5b5e3b352aa1056bcb7f21389",
+        "payload_size_bytes": 148282,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 145128
+          },
+          {
+            "type": "text",
+            "chars": 105
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "하늘",
+          "아"
+        ],
+        "negative_substrings": [
+          "silent",
+          "no audio",
+          "beep only"
+        ],
+        "event_timing": {}
+      },
+      "raw_model_answer": "",
+      "raw_response_metadata": {
+        "http_status": 400,
+        "error": "http_error",
+        "body_text": "{\"error\":{\"message\":\"Invalid or unsupported audio file.\",\"type\":\"BadRequestError\",\"param\":null,\"code\":400}}"
+      },
+      "normalized": {
+        "status": "FAIL",
+        "mode": "model_response",
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": [],
+        "expect_no_audio_applied": false
+      },
+      "timings_ms": {
+        "first_response_ms": 7.5,
+        "request_total_ms": 7.5
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": null
+    },
+    {
+      "key": "no_audio_ablation",
+      "status": "FAIL",
+      "fixture_files": {
+        "no_audio_ablation.wav": {
+          "path": "no_audio_ablation.wav",
+          "size_bytes": 102444,
+          "sha256": "1be7881ee2c5792b88b9f69f38fa4063d9ee110fdf765a04e4e984e590311ed3"
+        },
+        "no_audio_ablation.mp4": {
+          "path": "no_audio_ablation.mp4",
+          "size_bytes": 2023,
+          "sha256": "f51bda79e26bd8359d80275dc731aff28e98f88b5ce32b4a44d12d1384d22996"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E2B-it",
+        "fixture_key": "no_audio_ablation",
+        "payload_sha256": "dab3c0085c3268ac4a61f9663d0080d7ad007b91400f3406688e5846251845e2",
+        "payload_size_bytes": 139700,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 136592
+          },
+          {
+            "type": "text",
+            "chars": 103
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "silent",
+          "no audio"
+        ],
+        "negative_substrings": [
+          "native audio probe green",
+          "하늘",
+          "beep"
+        ],
+        "event_timing": {}
+      },
+      "raw_model_answer": "",
+      "raw_response_metadata": {
+        "http_status": 400,
+        "error": "http_error",
+        "body_text": "{\"error\":{\"message\":\"Invalid or unsupported audio file.\",\"type\":\"BadRequestError\",\"param\":null,\"code\":400}}"
+      },
+      "normalized": {
+        "status": "FAIL",
+        "mode": "model_response",
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": [],
+        "expect_no_audio_applied": false
+      },
+      "timings_ms": {
+        "first_response_ms": 9.3,
+        "request_total_ms": 9.3
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": null
+    },
+    {
+      "key": "beep_only",
+      "status": "FAIL",
+      "fixture_files": {
+        "beep_only.wav": {
+          "path": "beep_only.wav",
+          "size_bytes": 89644,
+          "sha256": "4cbdd92d990ef7e52f482bc2f97136fd7ea0d419cd3f8f01ffbb46480cb0bdb2"
+        },
+        "beep_only.mp4": {
+          "path": "beep_only.mp4",
+          "size_bytes": 1946,
+          "sha256": "f1dbae021042f964229c5cd2831c3aa7b9920cce4f6f95c225366b2afeeb8a0a"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E2B-it",
+        "fixture_key": "beep_only",
+        "payload_sha256": "354fae7220b99bb7ac102189581b0883cf5f1515fb7e2710c9d59ec2d9364290",
+        "payload_size_bytes": 122567,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 119528
+          },
+          {
+            "type": "text",
+            "chars": 138
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "beep",
+          "tone",
+          "non-speech"
+        ],
+        "negative_substrings": [
+          "native audio probe green",
+          "하늘"
+        ],
+        "event_timing": {}
+      },
+      "raw_model_answer": "",
+      "raw_response_metadata": {
+        "http_status": 400,
+        "error": "http_error",
+        "body_text": "{\"error\":{\"message\":\"Invalid or unsupported audio file.\",\"type\":\"BadRequestError\",\"param\":null,\"code\":400}}"
+      },
+      "normalized": {
+        "status": "FAIL",
+        "mode": "model_response",
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": [],
+        "expect_no_audio_applied": false
+      },
+      "timings_ms": {
+        "first_response_ms": 8.4,
+        "request_total_ms": 8.4
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": null
+    },
+    {
+      "key": "av_sync",
+      "status": "FAIL",
+      "fixture_files": {
+        "av_sync.wav": {
+          "path": "av_sync.wav",
+          "size_bytes": 108844,
+          "sha256": "fcb1435d32cdb236a628255c6993bfd3c9585241e157cfff0c97379a01526bda"
+        },
+        "av_sync.mp4": {
+          "path": "av_sync.mp4",
+          "size_bytes": 2056,
+          "sha256": "c29d58bd4319667b9aff0407765d318c39d9e546e642b34aaf70a72d8a5de9a9"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E2B-it",
+        "fixture_key": "av_sync",
+        "payload_sha256": "588152459b21eef3a80e4af281023b450b97825c1dbe4bd93b390878bef58605",
+        "payload_size_bytes": 148334,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 145128
+          },
+          {
+            "type": "text",
+            "chars": 157
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "sync",
+          "align",
+          "flash"
+        ],
+        "negative_substrings": [
+          "silent",
+          "no audio"
+        ],
+        "event_timing": {
+          "audio_beep_ms": [
+            1000,
+            2200
+          ],
+          "visual_flash_ms": [
+            1000,
+            2200
+          ],
+          "max_alignment_error_ms": 120
+        }
+      },
+      "raw_model_answer": "",
+      "raw_response_metadata": {
+        "http_status": 400,
+        "error": "http_error",
+        "body_text": "{\"error\":{\"message\":\"Invalid or unsupported audio file.\",\"type\":\"BadRequestError\",\"param\":null,\"code\":400}}"
+      },
+      "normalized": {
+        "status": "FAIL",
+        "mode": "model_response",
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": [],
+        "expect_no_audio_applied": false
+      },
+      "timings_ms": {
+        "first_response_ms": 12.9,
+        "request_total_ms": 12.9
+      },
+      "event_response_latency_ms": null,
+      "event_response_budget_ms": null
+    },
+    {
+      "key": "cross_modal_event",
+      "status": "FAIL",
+      "fixture_files": {
+        "cross_modal_event.wav": {
+          "path": "cross_modal_event.wav",
+          "size_bytes": 134444,
+          "sha256": "9ad5d0dbdaf9a3e6efc4ece36950675a8c03c132de83adbf60aa0aad4e95c227"
+        },
+        "cross_modal_event.mp4": {
+          "path": "cross_modal_event.mp4",
+          "size_bytes": 2091,
+          "sha256": "6f2a0e51d0dc8b7c7168998abac58cbaa515604898031283fdf6baadcd8b319b"
+        }
+      },
+      "request_metadata": {
+        "endpoint": "http://localhost:8002/v1/chat/completions",
+        "method": "POST",
+        "model": "google/gemma-4-E2B-it",
+        "fixture_key": "cross_modal_event",
+        "payload_sha256": "c3279b834837f72da3664b615c1edb336f2522c94df88679918b658bd58d395e",
+        "payload_size_bytes": 182578,
+        "content_parts": [
+          {
+            "type": "video_url",
+            "media_type": "video/mp4",
+            "url_prefix": "data:video/mp4;base64,AAAAIGZ0eX",
+            "data_url": true
+          },
+          {
+            "type": "input_audio",
+            "format": "wav",
+            "base64_bytes": 179260
+          },
+          {
+            "type": "text",
+            "chars": 225
+          }
+        ],
+        "audio_transport": "input_audio",
+        "raw_request_generation": {
+          "stream": false,
+          "max_tokens": 256,
+          "temperature": 0
+        }
+      },
+      "validation": {
+        "status": "PASS",
+        "violations": [],
+        "media_types": {
+          "audio_manifest": "audio/wav",
+          "audio_guess": "audio/x-wav",
+          "video_manifest": "video/mp4",
+          "video_guess": "video/mp4"
+        },
+        "expected_substrings": [
+          "sky",
+          "look",
+          "ah",
+          "event"
+        ],
+        "negative_substrings": [
+          "silent",
+          "no audio",
+          "audio only"
+        ],
+        "event_timing": {
+          "target_event_start_ms": 1600,
+          "target_event_end_ms": 2600,
+          "audio_cue_ms": 1700,
+          "visual_cue_ms": 1600,
+          "response_budget_ms": 2000
+        }
+      },
+      "raw_model_answer": "",
+      "raw_response_metadata": {
+        "http_status": 400,
+        "error": "http_error",
+        "body_text": "{\"error\":{\"message\":\"Invalid or unsupported audio file.\",\"type\":\"BadRequestError\",\"param\":null,\"code\":400}}"
+      },
+      "normalized": {
+        "status": "FAIL",
+        "mode": "model_response",
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": [],
+        "expect_no_audio_applied": false
+      },
+      "timings_ms": {
+        "first_response_ms": 15.0,
+        "request_total_ms": 15.0
+      },
+      "event_response_latency_ms": 15.0,
+      "event_response_budget_ms": 2000
+    }
+  ]
+}

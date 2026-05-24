@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.egg-info/
+
+# Large media / fixtures (kept on disk, not in git)
+*.mp4
+*.wav
+
+# OS
+.DS_Store

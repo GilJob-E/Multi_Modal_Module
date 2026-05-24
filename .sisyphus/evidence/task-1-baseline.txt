@@ -1,0 +1,11 @@
+Local-only verification: no cloud APIs, no hosted transcription, no manual listening.
+Command: nvidia-smi --query-gpu=index,name,memory.total,memory.used,utilization.gpu --format=csv,noheader
+Exit code: 0
+Output:
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 9 MiB, 0 %
+1, NVIDIA GeForce RTX 4090, 24564 MiB, 1 MiB, 0 %
+
+Command: docker ps -a --filter name=vllm-gemma4 --format {{.Names}}\t{{.Status}}\t{{.Image}}
+Exit code: 0
+Output:
+vllm-gemma4	Exited (0) 15 hours ago	vllm/vllm-openai:nightly

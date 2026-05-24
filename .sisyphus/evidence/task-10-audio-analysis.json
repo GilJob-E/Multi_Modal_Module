@@ -1,0 +1,93 @@
+{
+  "all_checks_passed": true,
+  "analysis_type": "deterministic local WAV cue analysis; degraded non-native fallback; not transcript ASR",
+  "checks": {
+    "beep_only_is_beep_tone": true,
+    "cross_modal_event_is_vocal_cue": true,
+    "cross_modal_event_vocal_cue_detected": true,
+    "endpoint_fallback_mode_degraded_local_audio_analysis": true,
+    "endpoint_native_success_false": true,
+    "endpoint_status_200": true,
+    "endpoint_used_no_vllm_payloads": true,
+    "no_audio_ablation_is_silence": true
+  },
+  "endpoint_check": {
+    "final_event": {
+      "audio_analysis": {
+        "active_ms": 900,
+        "beep_tone_detected": false,
+        "channels": 1,
+        "confidence": 0.86,
+        "dominant_frequency_hz": 439.4,
+        "duration_ms": 4200,
+        "label": "vocal-cue/sustained-ah",
+        "longest_active_ms": 900,
+        "sample_rate_hz": 16000,
+        "silence_detected": false,
+        "summary": "Detected a sustained mid-frequency ah-like vocal cue using local WAV analysis; this is degraded non-native audio analysis, not ASR.",
+        "vocal_cue_detected": true
+      },
+      "audio_used_ms": 4200,
+      "fallback_mode": "degraded_local_audio_analysis",
+      "frames_used": 2,
+      "native_success": false,
+      "text": "Degraded non-native fallback: using 2 recent visual frame(s) plus deterministic local WAV analysis, I detected a sustained 아~/ah-like vocal cue. Prompt: Use both image and audio. What cue happened?",
+      "total_ms": 0.3,
+      "type": "final"
+    },
+    "method": "POST",
+    "path": "/v1/sessions/{session_id}/generate-av-fallback",
+    "status_code": 200,
+    "vllm_payload_count": 0
+  },
+  "fallback_mode": "degraded_local_audio_analysis",
+  "fixtures": {
+    "beep_only": {
+      "active_ms": 1080,
+      "beep_tone_detected": true,
+      "channels": 1,
+      "confidence": 0.83,
+      "dominant_frequency_hz": 998.6,
+      "duration_ms": 2800,
+      "label": "beep/tone",
+      "longest_active_ms": 360,
+      "sample_rate_hz": 16000,
+      "silence_detected": false,
+      "summary": "Detected a deterministic tone/beep pattern rather than an ah-like vocal cue.",
+      "vocal_cue_detected": false
+    },
+    "cross_modal_event": {
+      "active_ms": 900,
+      "beep_tone_detected": false,
+      "channels": 1,
+      "confidence": 0.86,
+      "dominant_frequency_hz": 439.4,
+      "duration_ms": 4200,
+      "label": "vocal-cue/sustained-ah",
+      "longest_active_ms": 900,
+      "sample_rate_hz": 16000,
+      "silence_detected": false,
+      "summary": "Detected a sustained mid-frequency ah-like vocal cue using local WAV analysis; this is degraded non-native audio analysis, not ASR.",
+      "vocal_cue_detected": true
+    },
+    "no_audio_ablation": {
+      "active_ms": 0,
+      "beep_tone_detected": false,
+      "channels": 1,
+      "confidence": 0.99,
+      "dominant_frequency_hz": null,
+      "duration_ms": 3200,
+      "label": "silence/no-audio",
+      "longest_active_ms": 0,
+      "sample_rate_hz": 16000,
+      "silence_detected": true,
+      "summary": "No meaningful local audio energy was detected.",
+      "vocal_cue_detected": false
+    }
+  },
+  "generated_at": "2026-05-22T06:17:17Z",
+  "native_success": false,
+  "route_decision_authority": ".sisyphus/evidence/task-6-route-decision.json selected_route=native-no-go fallback_enabled=true",
+  "schema_version": 1,
+  "task": "Task 10 - Degraded Local ASR Contingency Gate"
+}

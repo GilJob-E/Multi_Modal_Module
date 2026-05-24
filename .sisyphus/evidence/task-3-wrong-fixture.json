@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-21T18:33:45.639431+00:00",
+  "status": "proof_invalid",
+  "no_go_type": "proof_invalid",
+  "model_id": "google/gemma-4-E4B-it",
+  "video_url": "file:///workspace/gje/video-test/sample30.mp4",
+  "fixture_url": "file:///workspace/gje/video-test/sample30.mp4",
+  "file_url": "file:///workspace/gje/video-test/sample30.mp4",
+  "mode": "direct_video",
+  "dry_run": true,
+  "ground_truth_path": ".sisyphus/evidence/vid0033-ground-truth.json",
+  "ground_truth_source_sha256": "139e6b4cc725b0a4836baffde1e811b5cf41271e2a5ac0fa6f4dec41645cd4a8",
+  "request_trace": {
+    "endpoint": "http://localhost:8002/v1/chat/completions",
+    "method": "POST",
+    "model": "google/gemma-4-E4B-it",
+    "mode": "direct_video",
+    "video_url": "file:///workspace/gje/video-test/sample30.mp4",
+    "media_urls": [
+      "file:///workspace/gje/video-test/sample30.mp4"
+    ],
+    "media_content_parts": [
+      {
+        "type": "video_url",
+        "url": "file:///workspace/gje/video-test/sample30.mp4"
+      },
+      {
+        "type": "text",
+        "prompt_chars": 488
+      }
+    ],
+    "fixture_identity": {
+      "host_path": "/home/kio/workspace/gje/vid_0033.mp4",
+      "container_path": "/workspace/gje/vid_0033.mp4",
+      "file_url": "file:///workspace/gje/vid_0033.mp4",
+      "sha256": "139e6b4cc725b0a4836baffde1e811b5cf41271e2a5ac0fa6f4dec41645cd4a8",
+      "allowed_local_media_path": "/workspace/gje",
+      "ground_truth_path": ".sisyphus/evidence/vid0033-ground-truth.json"
+    },
+    "forbidden_path_checks": {
+      "status": "FAIL",
+      "expected_file_url": "file:///workspace/gje/vid_0033.mp4",
+      "actual_file_url": "file:///workspace/gje/video-test/sample30.mp4",
+      "checked_marker_count": 10,
+      "violations": [
+        "forbidden_marker:sample30.mp4",
+        "wrong_fixture_url"
+      ],
+      "checked_terms": [
+        "qwen",
+        "generate-av-fallback",
+        "/generate",
+        "/v1/sessions/",
+        "/frames",
+        "/audio",
+        "audio_analysis",
+        "cross_modal_event",
+        "sample30.mp4",
+        "native_success=false"
+      ]
+    },
+    "request_body": {
+      "model": "google/gemma-4-E4B-it",
+      "stream": false,
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "video_url",
+              "video_url": {
+                "url": "file:///workspace/gje/video-test/sample30.mp4"
+              }
+            },
+            {
+              "type": "text",
+              "text": "Analyze the attached MP4 as native multimodal input, using both its visual track and audio track. Do not use external tools, transcripts, or prior fixture knowledge. Return a compact JSON object with these keys: visual_observations, audio_observations, cross_modal_observations, uncertainty. Include observable timing notes for the beginning, middle, and end of the clip, and say when audio activity appears or disappears. Do not invent exact spoken words unless they are clearly audible."
+            }
+          ]
+        }
+      ],
+      "max_tokens": 768,
+      "temperature": 0
+    }
+  },
+  "raw_response": null,
+  "visual_check": null,
+  "audio_check": null,
+  "cross_modal_check": null,
+  "forbidden_path_checks": {
+    "status": "FAIL",
+    "expected_file_url": "file:///workspace/gje/vid_0033.mp4",
+    "actual_file_url": "file:///workspace/gje/video-test/sample30.mp4",
+    "checked_marker_count": 10,
+    "violations": [
+      "forbidden_marker:sample30.mp4",
+      "wrong_fixture_url"
+    ],
+    "checked_terms": [
+      "qwen",
+      "generate-av-fallback",
+      "/generate",
+      "/v1/sessions/",
+      "/frames",
+      "/audio",
+      "audio_analysis",
+      "cross_modal_event",
+      "sample30.mp4",
+      "native_success=false"
+    ]
+  },
+  "probe_scores": {},
+  "ttft_ms": null,
+  "total_ms": null,
+  "streaming_refactor_allowed": false,
+  "reason": "forbidden_marker:sample30.mp4; wrong_fixture_url",
+  "locked_statuses": [
+    "gemma4_capability_no_go",
+    "gemma4_native_real_video_pass",
+    "proof_invalid",
+    "schema_media_failure",
+    "serving_runtime_unresolved"
+  ]
+}

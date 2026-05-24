@@ -1,0 +1,113 @@
+{
+  "schema_version": 2,
+  "task": "audio-understanding-native-local task 2 support matrix",
+  "reviewed_at": "2026-05-22",
+  "fixed_candidate_order": [
+    "gemma4-e4b",
+    "gemma4-e2b",
+    "qwen2.5-omni",
+    "local-asr-contingency"
+  ],
+  "local_hardware_assumption": "Task 1 evidence: local-only host with 2x NVIDIA GeForce RTX 4090, 24564 MiB each. Task 2 did not start, download, benchmark, or use cloud inference.",
+  "native_success_definition": "A local model/engine route that ingests explicit audio tokens plus visual input and passes controlled audio-positive, no-audio, beep-only, Korean phrase, AV sync, and cross-modal event probes. AAC embedded inside MP4 video_url alone is not counted.",
+  "source_findings": [
+    {
+      "source": "https://ai.google.dev/gemma/docs/core/model_card_4",
+      "status": "searched after direct fetch transport failure",
+      "finding": "Google model card/search excerpts list E2B and E4B as Text/Image/Audio; 31B as Text/Image with no audio encoder; audio max length 30s; video handled as frames."
+    },
+    {
+      "source": "https://ai.google.dev/gemma/docs/capabilities/audio",
+      "status": "direct fetch transport failure; corroborated by model card and vLLM docs",
+      "finding": "Gemma audio use is documented for E2B/E4B and should be exercised through explicit audio content, not hidden MP4 audio."
+    },
+    {
+      "source": "https://docs.vllm.ai/projects/recipes/en/latest/Google/Gemma4.html",
+      "status": "inspected",
+      "finding": "vLLM recipe lists google/gemma-4-E2B-it and google/gemma-4-E4B-it as 1x 24GB+ BF16 models, says Gemma 4 E2B/E4B include audio, requires vllm[audio], and shows audio_url plus image/video examples."
+    },
+    {
+      "source": "https://github.com/vllm-project/vllm/blob/main/vllm/model_executor/models/gemma4_mm.py",
+      "status": "inspected via raw source",
+      "finding": "vLLM Gemma4 multimodal source validates audio only when hf config has audio_config, includes image/audio/video modalities, and notes video is decomposed into timestamped image frames rather than a separate native video tower."
+    },
+    {
+      "source": "https://github.com/QwenLM/Qwen2.5-Omni/blob/main/README.md",
+      "status": "inspected via raw README",
+      "finding": "Qwen2.5-Omni processes text, images, audio, and video; Transformers usage requires qwen-omni-utils and consistent use_audio_in_video; BF16 7B video memory is above a single 24GB GPU for 15s video, while 4-bit quantized 7B and 3B routes reduce fit risk."
+    },
+    {
+      "source": "sglang/EXPERIMENT_LOG.md",
+      "status": "inspected",
+      "finding": "SGLang is not the preferred Gemma4 route on the current 2x4090 host because prior 31B experiments hit memory/performance and Gemma4 vision AWQ support limitations; vLLM remains the local serving default."
+    },
+    {
+      "source": ".sisyphus/evidence/task-1-31b-negative.json",
+      "status": "inspected",
+      "finding": "Current google/gemma-4-31B-it vLLM video_url AAC MP4 path is recorded as not accepted for native audio success."
+    }
+  ],
+  "candidates": [
+    {
+      "name": "gemma4-e4b",
+      "model_id": "google/gemma-4-E4B-it",
+      "engine": "vLLM OpenAI-compatible local server with vllm[audio] support",
+      "native_audio": true,
+      "native_video_or_image": true,
+      "local_gpu_fit_assumption": "Primary candidate. vLLM recipe lists E4B IT as 1x NVIDIA 24GB+ BF16; the project host has 2x4090 24GB. Actual local startup, mm limits, and probe behavior remain Task 4 evidence, not Task 2 claims.",
+      "api_shape": "OpenAI chat/completions multimodal content parts. Use image_url[] for recent frames or video_url for frame-extracted visual context, plus explicit audio_url WAV or input_audio base64 WAV. Launch with limit-mm-per-prompt including audio; do not rely on embedded MP4 AAC.",
+      "go_condition": "Attempt first. Go if local vLLM starts google/gemma-4-E4B-it without OOM, /v1/models returns it, config exposes audio_config, explicit WAV audio with visual input is accepted, and controlled native audio/cross-modal probes pass.",
+      "no_go_condition": "No-go if access/download is unavailable, vLLM image lacks Gemma4 audio support or vllm[audio] deps, audio_config is absent, input_audio/audio_url is rejected, startup exceeds local GPU constraints, or ablation probes fail.",
+      "access_license_availability_risks": "Gemma 4 model card lists Apache 2.0; Hugging Face/Kaggle access may still require authenticated download/cache acceptance. Use only local cached/downloaded weights and no hosted inference.",
+      "serving_shape_uncertainty": "vLLM docs show audio_url; repo native path may prefer input_audio base64 WAV. Accept either explicit WAV shape only if the local vLLM build proves it. Video is visual frames in vLLM source, not proof that MP4 audio is consumed.",
+      "fallback_only": false
+    },
+    {
+      "name": "gemma4-e2b",
+      "model_id": "google/gemma-4-E2B-it",
+      "engine": "vLLM OpenAI-compatible local server with vllm[audio] support",
+      "native_audio": true,
+      "native_video_or_image": true,
+      "local_gpu_fit_assumption": "Second candidate. vLLM recipe lists E2B IT as 1x NVIDIA 24GB+ BF16 and Google/HF model card excerpts list the same audio-capable modality set as E4B. It should be the safer same-family fit if E4B fails.",
+      "api_shape": "Same explicit local multimodal shape as E4B: image_url[] or video_url for visual context plus explicit audio_url WAV or input_audio base64 WAV. Do not infer audio success from MP4 video_url alone.",
+      "go_condition": "Attempt second only after E4B no-go evidence. Go if local vLLM exposes audio_config for E2B, accepts explicit WAV audio plus visual input, and passes the same native audio and cross-modal probes.",
+      "no_go_condition": "No-go if checkpoint access is unavailable, vLLM lacks E2B audio_config support, explicit WAV payloads fail, local startup fails, or model quality cannot satisfy Korean phrase, beep/no-audio ablation, AV sync, and cross-modal tests.",
+      "access_license_availability_risks": "Gemma 4 model card lists Apache 2.0; authenticated Hugging Face/Kaggle access/cache may be needed. Smaller size reduces VRAM risk but does not remove model quality risk.",
+      "serving_shape_uncertainty": "Expected to match E4B in vLLM, but Task 4 must verify exact accepted OpenAI-compatible audio part type and launch flags on the local image.",
+      "fallback_only": false
+    },
+    {
+      "name": "qwen2.5-omni",
+      "model_id": "Qwen/Qwen2.5-Omni-7B-GPTQ-Int4",
+      "alternate_model_ids": [
+        "Qwen/Qwen2.5-Omni-7B-AWQ",
+        "Qwen/Qwen2.5-Omni-3B",
+        "Qwen/Qwen2.5-Omni-7B"
+      ],
+      "engine": "Transformers + qwen-omni-utils local inference first; vLLM only if local explicit AV parity is proven",
+      "native_audio": true,
+      "native_video_or_image": true,
+      "local_gpu_fit_assumption": "Third candidate. README BF16 memory guidance makes 7B video risky on 24GB GPUs, especially beyond short clips; 7B GPTQ/AWQ quantized or 3B local routes are the plausible local-fit paths. No Task 2 benchmark or cloud inference was run.",
+      "api_shape": "Qwen typed conversation content with audio/video/image/text parts, processed by Qwen2_5OmniProcessor and qwen_omni_utils.process_mm_info. For video audio, keep use_audio_in_video consistent in preprocessing, processor call, and generate; for mixed media, preserve explicit audio/video fields.",
+      "go_condition": "Attempt third only after Gemma4 E4B and E2B no-go evidence. Go if a local quantized 7B or 3B route loads without hosted services and passes the same native audio, visual, AV sync, Korean phrase, and cross-modal event probes.",
+      "no_go_condition": "No-go if only cloud/API inference works, local quantized/3B checkpoints cannot fit, required dependencies or model code are unavailable, use_audio_in_video cannot be deterministic, vLLM serving lacks required AV parity, or latency/complexity prevents controlled local probes.",
+      "access_license_availability_risks": "README points to public Hugging Face/ModelScope checkpoints and quantized 4-bit releases; verify the exact checkpoint license/terms before product use. Third-party deps include transformers, accelerate, ffmpeg, and qwen-omni-utils/decord.",
+      "serving_shape_uncertainty": "Transformers path is the documented native path; vLLM support exists in Qwen docs but must be rechecked locally for audio output/input parity. Prefer return_audio=false for text-only probe outputs unless speech synthesis is explicitly needed.",
+      "fallback_only": false
+    },
+    {
+      "name": "local-asr-contingency",
+      "model_id": "local-asr-sidecar",
+      "engine": "Local ASR sidecar plus existing Gemma4 31B image/frame path",
+      "native_audio": false,
+      "native_video_or_image": false,
+      "local_gpu_fit_assumption": "Degraded composed route. It can be CPU or local-GPU ASR, but only after all native candidates have no-go evidence. It does not prove audio-token ingestion by the multimodal model.",
+      "api_shape": "Local WAV audio is transcribed to text, transcript text is injected into the prompt, and existing image_url[] frame context is sent to the vision model. No native audio tokens are sent to the LLM.",
+      "go_condition": "Allowed only as fallback after Gemma4 E4B, Gemma4 E2B, and Qwen2.5-Omni have documented no-go evidence, and only if UI/docs label it degraded non-native behavior.",
+      "no_go_condition": "No-go as primary route, no-go if it requires hosted ASR or cloud inference, and no-go if anyone presents transcript fusion as native audio understanding.",
+      "access_license_availability_risks": "Must use local ASR only; exact ASR model/license remains a later contingency decision. It is intentionally excluded from native success.",
+      "serving_shape_uncertainty": "None for native audio because this is not native. Its only acceptable shape is an explicitly labeled fallback transcript-fusion path.",
+      "fallback_only": true
+    }
+  ]
+}

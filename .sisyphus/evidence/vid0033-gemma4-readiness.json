@@ -1,0 +1,102 @@
+{
+  "generated_at": "2026-05-22T05:21:57.239552+00:00",
+  "model_id": "google/gemma-4-E2B-it",
+  "container": "vllm-gemma4-e2b-task4-port8002",
+  "image": "vllm/vllm-openai:nightly",
+  "command": [
+    "docker",
+    "run",
+    "-d",
+    "--name",
+    "vllm-gemma4-e2b-task4-port8002",
+    "--gpus",
+    "all",
+    "--ipc=host",
+    "--shm-size",
+    "16G",
+    "-p",
+    "127.0.0.1:8002:8000",
+    "-v",
+    "/home/kio/hf_cache:/root/.cache/huggingface",
+    "-v",
+    "/home/kio/workspace/gje:/workspace/gje:ro",
+    "-e",
+    "VLLM_ENGINE_READY_TIMEOUT_S=3600",
+    "-e",
+    "HF_TOKEN=<HF_TOKEN_REDACTED>",
+    "vllm/vllm-openai:nightly",
+    "--host",
+    "0.0.0.0",
+    "--port",
+    "8000",
+    "--model",
+    "google/gemma-4-E2B-it",
+    "--tensor-parallel-size",
+    "1",
+    "--max-model-len",
+    "4096",
+    "--max-num-batched-tokens",
+    "8192",
+    "--gpu-memory-utilization",
+    "0.90",
+    "--limit-mm-per-prompt",
+    "{\"video\":1,\"audio\":1,\"image\":4}",
+    "--allowed-local-media-path",
+    "/workspace/gje",
+    "--dtype",
+    "bfloat16"
+  ],
+  "command_sanitized": "docker run -d --name vllm-gemma4-e2b-task4-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E2B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {\"video\":1,\"audio\":1,\"image\":4} --allowed-local-media-path /workspace/gje --dtype bfloat16",
+  "mounts": [
+    {
+      "host": "/home/kio/hf_cache",
+      "container": "/root/.cache/huggingface",
+      "mode": "rw"
+    },
+    {
+      "host": "/home/kio/workspace/gje",
+      "container": "/workspace/gje",
+      "mode": "ro"
+    }
+  ],
+  "env": {
+    "VLLM_ENGINE_READY_TIMEOUT_S": "3600"
+  },
+  "tensor_parallel_size": 1,
+  "readiness_timeout_s": 3600,
+  "base_url": "http://127.0.0.1:8002",
+  "host_port": "127.0.0.1:8002",
+  "container_port": 8000,
+  "local_media_root": "/workspace/gje",
+  "fixture_uri": "file:///workspace/gje/vid_0033.mp4",
+  "ipc": "host",
+  "shm_size": "16G",
+  "classification": "ready",
+  "failure_reason": "",
+  "gpu_snapshot": {
+    "command": [
+      "nvidia-smi",
+      "--query-gpu=index,name,memory.used,memory.total,utilization.gpu",
+      "--format=csv,noheader,nounits"
+    ],
+    "exit_code": 0,
+    "stdout": "0, NVIDIA GeForce RTX 4090, 9, 24564, 0\n1, NVIDIA GeForce RTX 4090, 1, 24564, 0",
+    "stderr": ""
+  },
+  "vllm_version": {
+    "command": [
+      "docker",
+      "run",
+      "--rm",
+      "vllm/vllm-openai:nightly",
+      "python3",
+      "-c",
+      "import vllm; print(vllm.__version__)"
+    ],
+    "exit_code": 1,
+    "version": null,
+    "stderr": "ack (most recent call last):\n  File \"/usr/local/bin/vllm\", line 10, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/vllm/entrypoints/cli/main.py\", line 85, in main\n    cmd.subparser_init(subparsers).set_defaults(dispatch_function=cmd.cmd)\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/vllm/entrypoints/cli/serve.py\", line 138, in subparser_init\n    serve_parser = make_arg_parser(serve_parser)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/vllm/entrypoints/openai/cli_args.py\", line 371, in make_arg_parser\n    parser = AsyncEngineArgs.add_cli_args(parser)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/vllm/engine/arg_utils.py\", line 2455, in add_cli_args\n    parser = EngineArgs.add_cli_args(parser)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/vllm/engine/arg_utils.py\", line 1397, in add_cli_args\n    vllm_kwargs = get_kwargs(VllmConfig)\n                  ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/vllm/engine/arg_utils.py\", line 399, in get_kwargs\n    return copy.deepcopy(_compute_kwargs(cls))\n                         ^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/vllm/engine/arg_utils.py\", line 309, in _compute_kwargs\n    default = default.default_factory()  # type: ignore[call-arg]\n              ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/pydantic/_internal/_dataclasses.py\", line 121, in __init__\n    s.__pydantic_validator__.validate_python(ArgsKwargs(args, kwargs), self_instance=s)\n  File \"/usr/local/lib/python3.12/dist-packages/vllm/config/device.py\", line 56, in __post_init__\n    raise RuntimeError(\nRuntimeError: Failed to infer device type, please set the environment variable `VLLM_LOGGING_LEVEL=DEBUG` to turn on verbose logging to help debug the issue."
+  },
+  "readiness": "{\"object\":\"list\",\"data\":[{\"id\":\"google/gemma-4-E2B-it\",\"object\":\"model\",\"created\":1779427500,\"owned_by\":\"vllm\",\"root\":\"google/gemma-4-E2B-it\",\"parent\":null,\"max_model_len\":4096,\"permission\":[{\"id\":\"modelperm-80c92c9f121ecd07\",\"object\":\"model_permission\",\"created\":1779427500,\"allow_create_engine\":false,\"allow_sampling\":true,\"allow_logprobs\":true,\"allow_search_indices\":false,\"allow_view\":true,\"allow_fine_tuning\":false,\"organization\":\"*\",\"group\":null,\"is_blocking\":false}]}]}",
+  "completed_at": "2026-05-22T05:25:00.558679+00:00"
+}

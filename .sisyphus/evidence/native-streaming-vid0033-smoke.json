@@ -1,0 +1,135 @@
+{
+  "captured_payload_count": 1,
+  "captured_payload_summary": {
+    "content_part_count": 3,
+    "fallback_used": false,
+    "image_url_present": false,
+    "input_audio_count": 1,
+    "input_audio_present": true,
+    "message_count": 2,
+    "text_count": 1,
+    "video_url_count": 1,
+    "video_url_present": true
+  },
+  "fake_audio_extractor_calls": [
+    {
+      "duration_seconds": 3.0,
+      "source_mp4_path": "/tmp/opencode/vid0033-native-smoke-czbhfavo/native-media/native-smoke-vid0033/20000-23000-685c9ea7a300adef9d055814307ba6b596e7f82d9316ca40e53a0f59a1f46367-2.mp4",
+      "start_seconds": 0
+    }
+  ],
+  "fallback_used": false,
+  "forbidden_path_checks": {
+    "asr_vad_transcript_or_rule_fallback_used": false,
+    "audio_analysis_imported_by_runner": false,
+    "called_endpoints": [
+      "/v1/native/sessions/native-smoke-vid0033/windows",
+      "/v1/native/sessions/native-smoke-vid0033/generate"
+    ],
+    "forbidden_called": [],
+    "forbidden_endpoints": [
+      "/v1/sessions/native-smoke-vid0033/frames",
+      "/v1/sessions/native-smoke-vid0033/generate",
+      "/v1/sessions/native-smoke-vid0033/audio",
+      "/v1/sessions/native-smoke-vid0033/generate-av-fallback"
+    ]
+  },
+  "image_url_present": false,
+  "input_audio_present": true,
+  "mode": "in-process-fake-vllm",
+  "native_endpoints": {
+    "generate": "/v1/native/sessions/native-smoke-vid0033/generate",
+    "windows": "/v1/native/sessions/native-smoke-vid0033/windows"
+  },
+  "ok": true,
+  "prompt": "지원자의 현재 답변과 태도를 짧게 보고 후속 질문 하나를 해줘.",
+  "response_excerpt": "네, 그 경험에서 배운 점을 조금 더 구체적으로 말씀해 주세요.",
+  "response_non_empty": true,
+  "session_id": "native-smoke-vid0033",
+  "source_matches_locked_fixture": true,
+  "source_media_metadata": {
+    "duration": "50.286009",
+    "size": "14607558",
+    "streams": [
+      {
+        "avg_frame_rate": "30/1",
+        "codec_name": "h264",
+        "codec_type": "video",
+        "duration": "50.266667",
+        "height": 480,
+        "index": 0,
+        "width": 640
+      },
+      {
+        "avg_frame_rate": "0/0",
+        "channels": 2,
+        "codec_name": "mp3",
+        "codec_type": "audio",
+        "duration": "50.286009",
+        "index": 1,
+        "sample_rate": "44100"
+      }
+    ]
+  },
+  "source_path": "/home/kio/workspace/gje/vid_0033.mp4",
+  "source_sha256": "139e6b4cc725b0a4836baffde1e811b5cf41271e2a5ac0fa6f4dec41645cd4a8",
+  "source_sha256_expected": "139e6b4cc725b0a4836baffde1e811b5cf41271e2a5ac0fa6f4dec41645cd4a8",
+  "sse_event_types": [
+    "ttft",
+    "token",
+    "token",
+    "final"
+  ],
+  "sse_final_metadata": {
+    "fallback_used": false,
+    "input_audio_present": true,
+    "native_media_mode": "video_url_plus_input_audio",
+    "text": "네, 그 경험에서 배운 점을 조금 더 구체적으로 말씀해 주세요.",
+    "total_ms": 0.2,
+    "type": "final",
+    "video_sha256": "685c9ea7a300adef9d055814307ba6b596e7f82d9316ca40e53a0f59a1f46367",
+    "video_url": "file:///native-smoke-media/native-smoke-vid0033/20000-23000-685c9ea7a300adef9d055814307ba6b596e7f82d9316ca40e53a0f59a1f46367-2.mp4"
+  },
+  "timings_ms": {
+    "generate": 2.1,
+    "total": 473.5,
+    "upload": 8.6
+  },
+  "uploaded_windows": [
+    {
+      "derived_path": "/tmp/opencode/vid0033-native-smoke-czbhfavo/vid0033-window-1-12000-15000.mp4",
+      "derived_sha256": "11b63f7019a3a316a780cbe6bf692674c6db94fa33224c556e1b420897d532aa",
+      "derived_size_bytes": 101136,
+      "duration_ms": 3000,
+      "end_ms": 15000,
+      "ffmpeg_elapsed_ms": 158.3,
+      "index": 1,
+      "start_ms": 12000,
+      "upload_response": {
+        "latest_duration_ms": 3000,
+        "latest_sha256": "11b63f7019a3a316a780cbe6bf692674c6db94fa33224c556e1b420897d532aa",
+        "latest_video_url": "file:///native-smoke-media/native-smoke-vid0033/12000-15000-11b63f7019a3a316a780cbe6bf692674c6db94fa33224c556e1b420897d532aa-1.mp4",
+        "session_id": "native-smoke-vid0033",
+        "stored_windows": 1
+      }
+    },
+    {
+      "derived_path": "/tmp/opencode/vid0033-native-smoke-czbhfavo/vid0033-window-2-20000-23000.mp4",
+      "derived_sha256": "685c9ea7a300adef9d055814307ba6b596e7f82d9316ca40e53a0f59a1f46367",
+      "derived_size_bytes": 95040,
+      "duration_ms": 3000,
+      "end_ms": 23000,
+      "ffmpeg_elapsed_ms": 144.8,
+      "index": 2,
+      "start_ms": 20000,
+      "upload_response": {
+        "latest_duration_ms": 3000,
+        "latest_sha256": "685c9ea7a300adef9d055814307ba6b596e7f82d9316ca40e53a0f59a1f46367",
+        "latest_video_url": "file:///native-smoke-media/native-smoke-vid0033/20000-23000-685c9ea7a300adef9d055814307ba6b596e7f82d9316ca40e53a0f59a1f46367-2.mp4",
+        "session_id": "native-smoke-vid0033",
+        "stored_windows": 2
+      }
+    }
+  ],
+  "video_url_present": true
+}

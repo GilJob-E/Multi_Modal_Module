@@ -1,0 +1,57 @@
+README.md:새 refactor는 별도 evidence인 `.sisyphus/evidence/native-streaming-user-override-go.json`의 `user_override_capability_go_for_refactor` 결정으로 진행합니다. 사용자는 accepted E4B native media 결과를 engineering refactor에 충분한 capability signal로 판단했습니다. 따라서 prior no-go history는 보존하고, 구현 권한만 user override로 분리합니다.
+README.md:- User override native path: `/v1/native/sessions/{id}/windows`로 rolling MP4 window를 올리고 `/v1/native/sessions/{id}/generate`가 `video_url`과 같은 window에서 뽑은 `input_audio` WAV를 보냅니다. 이 native path는 `image_url[]`를 쓰지 않습니다.
+INFERENCE_PIPELINE.md:이 no-go 기록은 그대로 보존한다. 새 native streaming refactor는 `.sisyphus/evidence/native-streaming-user-override-go.json`의 `decision=user_override_capability_go_for_refactor`로 진행한다. 사용자가 accepted E4B native media 결과를 engineering refactor에 충분한 capability signal로 판단했기 때문이다. 이 결정은 prior proof gate를 pass로 바꾸지 않고, `gemma4_native_real_video_pass`를 retroactive로 주장하지 않는다.
+INFERENCE_PIPELINE.md:   - MP4 upload: `POST /v1/native/sessions/{id}/windows`
+INFERENCE_PIPELINE.md:   - Native generate: `POST /v1/native/sessions/{id}/generate`
+INFERENCE_PIPELINE.md:   - Payload shape: `video_url` plus same-window `input_audio` WAV plus text.
+INFERENCE_PIPELINE.md:`POST /v1/native/sessions/{id}/windows` stores a rolling MP4 window.
+INFERENCE_PIPELINE.md:`POST /v1/native/sessions/{id}/generate` streams SSE from the latest native MP4 window.
+INFERENCE_PIPELINE.md:Final SSE includes `native_media_mode`, `video_sha256`, `video_url`, `input_audio_present`, `fallback_used=false`, and `total_ms`.
+local-infer/README.md:기존 low-latency 경로는 **1fps JPEG frame push + 최근 N프레임 `image_url[]` 생성**으로 유지한다. User override refactor로 별도 native 경로도 추가됐다. 이 경로는 rolling MP4 window를 `video_url`로 보내고 같은 window에서 뽑은 WAV `input_audio`를 함께 보낸다.
+local-infer/README.md:이 no-go history는 지우지 않는다. Native streaming refactor는 `.sisyphus/evidence/native-streaming-user-override-go.json`의 `decision=user_override_capability_go_for_refactor` 때문에 진행한다. 사용자가 accepted E4B native media 결과를 engineering refactor에 충분하다고 명시적으로 판단했기 때문이다. 이 문서는 prior proof gate가 now passes라고 말하지 않으며 `gemma4_native_real_video_pass`를 retroactive로 주장하지 않는다.
+local-infer/README.md:- Native `video_url` plus same-window `input_audio` payload
+local-infer/README.md:Native path는 `/v1/native/sessions/{id}/generate` 안에서 `image_url[]`를 보내지 않는다. Payload는 `video_url`, same-window `input_audio` WAV, text 순서다.
+local-infer/README.md:├── native_audio.py         # same-window WAV input_audio extraction
+local-infer/README.md:├── native_payloads.py      # video_url + input_audio payload builder
+local-infer/README.md:`LOCAL_INFER_NATIVE_MEDIA_DIR` is where local-infer writes rolling MP4 windows. `LOCAL_INFER_NATIVE_MEDIA_URL_PREFIX` is the URL prefix placed into the native `video_url` payload. In local non-container runs, the default `file://{LOCAL_INFER_NATIVE_MEDIA_DIR}` is enough.
+local-infer/README.md:For Docker/vLLM, media files must be visible inside the vLLM container at the same path or through an agreed mapped path. If later `file://` access is used with vLLM in a container, mount the media directory into the container and configure any required allowed local media path setting for that vLLM deployment. Do not point `video_url` at a host-only path that the container cannot read.
+local-infer/README.md:curl -X POST http://localhost:8080/v1/native/sessions/demo/windows -H 'content-type: application/json' -d '{"start_ms":12000,"end_ms":17000,"video_mp4_base64":"<base64 mp4 bytes>","mime_type":"video/mp4"}'
+local-infer/README.md:curl -N -X POST http://localhost:8080/v1/native/sessions/demo/generate -H 'content-type: application/json' -d '{"prompt":"지원자의 현재 답변과 태도를 짧게 보고 후속 질문 하나를 해줘.","system_prompt":"당신은 한국어 화상 면접관입니다...","max_tokens":128,"temperature":0.2,"model":null,"stream":true}'
+local-infer/README.md:data: {"type":"final","text":"...","native_media_mode":"video_url_plus_input_audio","video_sha256":"...","video_url":"file:///...mp4","input_audio_present":true,"fallback_used":false,"total_ms":123.4}
+local-infer/docs/API_CONTRACT.md:The additive native streaming API exists because `.sisyphus/evidence/native-streaming-user-override-go.json` records `decision=user_override_capability_go_for_refactor`. The user explicitly judged the accepted E4B native media result sufficient for engineering refactor. This does not claim `gemma4_native_real_video_pass` retroactively.
+local-infer/docs/API_CONTRACT.md:## POST `/v1/native/sessions/{session_id}/windows`
+local-infer/docs/API_CONTRACT.md:  "latest_video_url": "file:///native-media/demo/<sha>.mp4"
+local-infer/docs/API_CONTRACT.md:## POST `/v1/native/sessions/{session_id}/generate`
+local-infer/docs/API_CONTRACT.md:  {"type": "video_url", "video_url": {"url": "file:///...mp4"}},
+local-infer/docs/API_CONTRACT.md:  {"type": "input_audio", "input_audio": {"data": "<base64 wav>", "format": "wav"}},
+local-infer/docs/API_CONTRACT.md:The `input_audio` is extracted from the same uploaded MP4 window. The native path sends no `image_url[]`.
+local-infer/docs/API_CONTRACT.md:data: {"type":"final","text":"...","native_media_mode":"video_url_plus_input_audio","video_sha256":"...","video_url":"file:///...mp4","input_audio_present":true,"fallback_used":false,"total_ms":123.4}
+local-infer/docs/API_CONTRACT.md:Required final fields are `native_media_mode`, `video_sha256`, `video_url`, `input_audio_present`, `fallback_used=false`, and `total_ms`.
+local-infer/docs/API_CONTRACT.md:- `LOCAL_INFER_NATIVE_MEDIA_URL_PREFIX`: URL prefix written into `video_url`. Default: `file://{LOCAL_INFER_NATIVE_MEDIA_DIR}`.
+local-infer/docs/API_CONTRACT.md:- Use `/v1/native/sessions/{id}/windows` plus `/v1/native/sessions/{id}/generate` only when testing the user override native path.
+local-infer/docs/DECISIONS.md:  - `video_url` 30초 전체 영상 cold TTFT 약 7.98s.
+local-infer/docs/DECISIONS.md:- 결정: 기존 path는 `/v1/sessions/{id}/frames`로 프레임을 쌓고 `/generate`에서 최근 N개를 사용한다. Native override path는 `/v1/native/sessions/{id}/windows`로 MP4 window를 쌓고 `/v1/native/sessions/{id}/generate`에서 latest window를 사용한다.
+local-infer/docs/DECISIONS.md:- 결정: `.sisyphus/evidence/native-streaming-user-override-go.json`의 `user_override_capability_go_for_refactor`에 따라 additive native path를 문서화한다.
+local-infer/docs/DECISIONS.md:- Native payload: latest MP4 window `video_url` plus same-window WAV `input_audio` plus text. No `image_url[]` on `/v1/native/sessions/{id}/generate`.
+local-infer/docs/RUNBOOK.md:Native path는 local-infer가 MP4 window files를 `LOCAL_INFER_NATIVE_MEDIA_DIR`에 쓰고, vLLM payload에는 `LOCAL_INFER_NATIVE_MEDIA_URL_PREFIX`로 만든 `video_url`을 넣는다.
+local-infer/docs/RUNBOOK.md:1. `POST /v1/native/sessions/{id}/windows`로 MP4 window를 push한다.
+local-infer/docs/RUNBOOK.md:2. `POST /v1/native/sessions/{id}/generate`를 `stream=true`로 호출한다.
+local-infer/docs/RUNBOOK.md:4. Final event has `native_media_mode`, `video_sha256`, `video_url`, `input_audio_present`, `fallback_used=false`, and `total_ms`.
+local-infer/docs/RUNBOOK.md:The smoke is structural and can use fake in-process vLLM. It must show `video_url`, same-window `input_audio`, no `image_url[]`, `fallback_used=false`, and non-empty SSE response.
+local-infer/docs/RUNBOOK.md:The native streaming refactor proceeds because `.sisyphus/evidence/native-streaming-user-override-go.json` records `decision=user_override_capability_go_for_refactor`. The user explicitly judged the accepted E4B native media result sufficient for engineering refactor. Do not claim the prior proof gate now passes.
+local-infer/docs/RUNBOOK.md:grep -R -E "user_override_capability_go_for_refactor|/v1/native/sessions/.*/windows|/v1/native/sessions/.*/generate|video_url|input_audio" README.md INFERENCE_PIPELINE.md local-infer/README.md local-infer/docs
+local-infer/docs/RUNBOOK.md:- `/v1/native/sessions/{id}/generate` 400 `no native window stored`: 먼저 native windows endpoint로 MP4 window push.
+local-infer/docs/RUNBOOK.md:- Native `video_url` read failure inside vLLM: Docker mount and allowed local media path configuration 확인.
+local-infer/docs/ARCHITECTURE.md:- Native `video_url` plus same-window `input_audio` vLLM 호출
+local-infer/docs/ARCHITECTURE.md:Streaming refactor is allowed only by the separate user override evidence `.sisyphus/evidence/native-streaming-user-override-go.json`, with `decision=user_override_capability_go_for_refactor`. The user explicitly judged the accepted E4B native media result sufficient for engineering refactor. This architecture does not mutate the prior gate and does not claim fallback/native proof success incorrectly.
+local-infer/docs/ARCHITECTURE.md:  ├─ POST /v1/native/sessions/{id}/windows
+local-infer/docs/ARCHITECTURE.md:  │   latest_video_url from LOCAL_INFER_NATIVE_MEDIA_URL_PREFIX
+local-infer/docs/ARCHITECTURE.md:  └─ POST /v1/native/sessions/{id}/generate
+local-infer/docs/ARCHITECTURE.md:      video_url + input_audio + text content parts, no image_url[]
+local-infer/docs/ARCHITECTURE.md:- **Native MP4 window 모델 추가**: `/v1/native/sessions/{id}/windows`는 base64 MP4 window를 저장한다.
+local-infer/docs/ARCHITECTURE.md:- **Native generate는 latest window만 사용**: `/v1/native/sessions/{id}/generate`는 latest stored MP4 window의 `video_url`과 same-window WAV `input_audio`를 보낸다.
+local-infer/docs/ARCHITECTURE.md:  {"type": "video_url", "video_url": {"url": "file:///...mp4"}},
+local-infer/docs/ARCHITECTURE.md:  {"type": "input_audio", "input_audio": {"data": "<base64 wav>", "format": "wav"}},
+local-infer/docs/ARCHITECTURE.md:`LOCAL_INFER_NATIVE_MEDIA_DIR` controls where local-infer writes native MP4 window files. `LOCAL_INFER_NATIVE_MEDIA_URL_PREFIX` controls the `video_url` string sent to vLLM. Default local behavior is `file://{LOCAL_INFER_NATIVE_MEDIA_DIR}`.
+local-infer/docs/ARCHITECTURE.md:- `src/local_infer/native_audio.py`: same-window WAV `input_audio` extraction
+local-infer/docs/ARCHITECTURE.md:- `src/local_infer/native_payloads.py`: `video_url` plus `input_audio` payload 생성

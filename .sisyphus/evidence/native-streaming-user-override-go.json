@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "decision": "user_override_capability_go_for_refactor",
+  "user_quote": "아냐. 그정도면 capab go야. refactor 진행해",
+  "prior_gate_path": ".sisyphus/evidence/vid0033-native-proof-gate.json",
+  "prior_gate_status": "gemma4_capability_no_go",
+  "prior_streaming_refactor_allowed": false,
+  "do_not_mutate_prior_gate": true,
+  "retroactive_proof_pass": false,
+  "fixture_path": "/home/kio/workspace/gje/vid_0033.mp4",
+  "accepted_native_proof_facts": [
+    "E4B",
+    "HTTP 200",
+    "visual PASS",
+    "audio/cross-modal FAIL from quiet-tail misclassification"
+  ],
+  "recorded_at": "2026-05-22T03:40:06.242361Z"
+}

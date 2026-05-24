@@ -1,0 +1,395 @@
+{
+  "schema_version": 2,
+  "created_by": "local-infer/tools/probe_qwen_omni_native.py",
+  "generated_at": "2026-05-22T05:35:55.680975+00:00",
+  "status": "NO_GO",
+  "engine": "Transformers + qwen-omni-utils local offline inference",
+  "primary_model": "Qwen/Qwen2.5-Omni-7B-GPTQ-Int4",
+  "model": "Qwen/Qwen2.5-Omni-3B",
+  "candidate_attempts": [
+    {
+      "model": "Qwen/Qwen2.5-Omni-7B-GPTQ-Int4",
+      "snapshot": "/home/kio/hf_cache/qwen-hub/models--Qwen--Qwen2.5-Omni-7B-GPTQ-Int4/snapshots/6d33b6bb5114a84de7efd38310779242520e7d4e",
+      "snapshot_exists": true,
+      "status": "load-no-go",
+      "elapsed_ms": 38.313,
+      "error_type": "ImportError",
+      "error": "Loading a GPTQ quantized model requires optimum (`pip install optimum`)"
+    },
+    {
+      "model": "Qwen/Qwen2.5-Omni-3B",
+      "snapshot": "/home/kio/hf_cache/qwen-hub/models--Qwen--Qwen2.5-Omni-3B/snapshots/f75b40e3da2003cdd6e1829b1f420ca70797c34e",
+      "snapshot_exists": true,
+      "status": "probed",
+      "model_load_elapsed_ms": 8828.004,
+      "model_class": "Qwen2_5OmniForConditionalGeneration",
+      "processor_class": "Qwen2_5OmniProcessor"
+    }
+  ],
+  "candidate_substitution": {
+    "used": true,
+    "reason": "Primary GPTQ snapshot was present but could not initialize with the available local GPTQ runtime; Task 2 allowed Qwen/Qwen2.5-Omni-3B as the next local-fit alternate."
+  },
+  "snapshot": "/home/kio/hf_cache/qwen-hub/models--Qwen--Qwen2.5-Omni-3B/snapshots/f75b40e3da2003cdd6e1829b1f420ca70797c34e",
+  "fixture_manifest": ".sisyphus/evidence/audio-fixtures/manifest.json",
+  "fixture_manifest_schema_version": 1,
+  "probe_count": 6,
+  "all_required_present": true,
+  "native_media_direct": true,
+  "direct_media_semantics": "Each probe sends typed Qwen content parts containing an explicit WAV audio path and a muted MP4 video path; no transcript text, hosted ASR, remote inference, or embedded MP4 audio is used as the audio source.",
+  "transcript_text_used": false,
+  "remote_inference_used": false,
+  "use_audio_in_video": false,
+  "probes": [
+    {
+      "name": "english_passphrase",
+      "status": "FAIL",
+      "prompt": "Listen to the explicit WAV audio. Return compact JSON with keys probe, heard, phrase, confidence. The expected phrase is not in this prompt; infer it from the audio.",
+      "expected_answer": "native audio probe green",
+      "expected_substrings": [
+        "native",
+        "audio",
+        "probe",
+        "green"
+      ],
+      "negative_substrings": [
+        "silent",
+        "no audio",
+        "beep only"
+      ],
+      "event_timing_ms": {},
+      "raw_request_metadata": {
+        "message_shape": "Qwen typed content list",
+        "media_types": [
+          "audio",
+          "video",
+          "text"
+        ],
+        "audio_input": {
+          "type": "audio",
+          "path": ".sisyphus/evidence/audio-fixtures/english_passphrase.wav",
+          "bytes": 102444,
+          "mime_type": "audio/wav",
+          "transport": "typed_local_path_direct_media"
+        },
+        "video_input": {
+          "type": "video",
+          "path": ".sisyphus/evidence/audio-fixtures/english_passphrase.mp4",
+          "bytes": 2023,
+          "mime_type": "video/mp4",
+          "video_audio_policy": "muted_video_track_only; audio is supplied explicitly as WAV",
+          "transport": "typed_local_path_direct_media"
+        },
+        "text_prompt_chars": 165,
+        "transcript_text_used": false,
+        "use_audio_in_video": false
+      },
+      "raw_model_answer": "{\\\"probe\\\": \\\"not in this prompt\\\", \\\"heard\\\": \\\"not in this prompt\\\", \\\"phrase\\\": \\\"not in this prompt\\\", \\\"confidence\\\": \\\"not in this prompt\\\"}",
+      "normalized": {
+        "status": "FAIL",
+        "mode": "model_response",
+        "matched_expected_substrings": [
+          "probe"
+        ],
+        "matched_negative_substrings": []
+      },
+      "event_response_latency_ms": null
+    },
+    {
+      "name": "no_audio_ablation",
+      "status": "FAIL",
+      "prompt": "The explicit WAV audio is the source of truth. Return compact JSON with keys probe, heard, audio_state.",
+      "expected_answer": "",
+      "expected_substrings": [
+        "silent",
+        "no audio"
+      ],
+      "negative_substrings": [
+        "native audio probe green",
+        "하늘",
+        "beep"
+      ],
+      "event_timing_ms": {},
+      "raw_request_metadata": {
+        "message_shape": "Qwen typed content list",
+        "media_types": [
+          "audio",
+          "video",
+          "text"
+        ],
+        "audio_input": {
+          "type": "audio",
+          "path": ".sisyphus/evidence/audio-fixtures/no_audio_ablation.wav",
+          "bytes": 102444,
+          "mime_type": "audio/wav",
+          "transport": "typed_local_path_direct_media"
+        },
+        "video_input": {
+          "type": "video",
+          "path": ".sisyphus/evidence/audio-fixtures/no_audio_ablation.mp4",
+          "bytes": 2023,
+          "mime_type": "video/mp4",
+          "video_audio_policy": "muted_video_track_only; audio is supplied explicitly as WAV",
+          "transport": "typed_local_path_direct_media"
+        },
+        "text_prompt_chars": 103,
+        "transcript_text_used": false,
+        "use_audio_in_video": false
+      },
+      "raw_model_answer": "```json\n{\n  \"probe\": \"The explicit WAV audio is the source of truth.\",\n  \"heard\": \"The explicit WAV audio is the source of truth.\",\n  \"audio_state\": \"The explicit WAV audio is the source of truth.\"\n}\n```",
+      "normalized": {
+        "status": "FAIL",
+        "mode": "model_response",
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": []
+      },
+      "event_response_latency_ms": null
+    },
+    {
+      "name": "beep_only",
+      "status": "PASS",
+      "prompt": "Classify the explicit WAV audio. Return compact JSON with keys probe, classification, speech. Do not transcribe non-speech tones as words.",
+      "expected_answer": "beep beep",
+      "expected_substrings": [
+        "beep",
+        "tone",
+        "non-speech"
+      ],
+      "negative_substrings": [
+        "native audio probe green",
+        "하늘"
+      ],
+      "event_timing_ms": {},
+      "raw_request_metadata": {
+        "message_shape": "Qwen typed content list",
+        "media_types": [
+          "audio",
+          "video",
+          "text"
+        ],
+        "audio_input": {
+          "type": "audio",
+          "path": ".sisyphus/evidence/audio-fixtures/beep_only.wav",
+          "bytes": 89644,
+          "mime_type": "audio/wav",
+          "transport": "typed_local_path_direct_media"
+        },
+        "video_input": {
+          "type": "video",
+          "path": ".sisyphus/evidence/audio-fixtures/beep_only.mp4",
+          "bytes": 1946,
+          "mime_type": "video/mp4",
+          "video_audio_policy": "muted_video_track_only; audio is supplied explicitly as WAV",
+          "transport": "typed_local_path_direct_media"
+        },
+        "text_prompt_chars": 138,
+        "transcript_text_used": false,
+        "use_audio_in_video": false
+      },
+      "raw_model_answer": "{\\\"probe\\\": \\\"beep\\\", \\\"classification\\\": \\\"non-speech\\\", \\\"speech\\\": \\\"none\\\"}",
+      "normalized": {
+        "status": "PASS",
+        "mode": "model_response",
+        "matched_expected_substrings": [
+          "beep",
+          "non-speech"
+        ],
+        "matched_negative_substrings": []
+      },
+      "event_response_latency_ms": null
+    },
+    {
+      "name": "korean_passphrase",
+      "status": "FAIL",
+      "prompt": "Listen to the explicit WAV audio and answer in Korean JSON. Return keys probe, heard, phrase, confidence.",
+      "expected_answer": "하늘 아",
+      "expected_substrings": [
+        "하늘",
+        "아"
+      ],
+      "negative_substrings": [
+        "silent",
+        "no audio",
+        "beep only"
+      ],
+      "event_timing_ms": {},
+      "raw_request_metadata": {
+        "message_shape": "Qwen typed content list",
+        "media_types": [
+          "audio",
+          "video",
+          "text"
+        ],
+        "audio_input": {
+          "type": "audio",
+          "path": ".sisyphus/evidence/audio-fixtures/korean_passphrase.wav",
+          "bytes": 108844,
+          "mime_type": "audio/wav",
+          "transport": "typed_local_path_direct_media"
+        },
+        "video_input": {
+          "type": "video",
+          "path": ".sisyphus/evidence/audio-fixtures/korean_passphrase.mp4",
+          "bytes": 2058,
+          "mime_type": "video/mp4",
+          "video_audio_policy": "muted_video_track_only; audio is supplied explicitly as WAV",
+          "transport": "typed_local_path_direct_media"
+        },
+        "text_prompt_chars": 105,
+        "transcript_text_used": false,
+        "use_audio_in_video": false
+      },
+      "raw_model_answer": "{\\\"probe\\\": \\\"이미지\\\", \\\"heard\\\": \\\"이미지\\\", \\\"phrase\\\": \\\"이미지\\\", \\\"confidence\\\": \\\"중요하지 않음\\\"}",
+      "normalized": {
+        "status": "FAIL",
+        "mode": "model_response",
+        "matched_expected_substrings": [],
+        "matched_negative_substrings": []
+      },
+      "event_response_latency_ms": null
+    },
+    {
+      "name": "av_sync",
+      "status": "PASS",
+      "prompt": "Use the explicit WAV audio and muted video. Return compact JSON with keys probe, sync_events, alignment. Mention whether the tones align with visual flashes.",
+      "expected_answer": "sync flash one two",
+      "expected_substrings": [
+        "sync",
+        "align",
+        "flash"
+      ],
+      "negative_substrings": [
+        "silent",
+        "no audio"
+      ],
+      "event_timing_ms": {
+        "audio_beep_ms": [
+          1000,
+          2200
+        ],
+        "visual_flash_ms": [
+          1000,
+          2200
+        ],
+        "max_alignment_error_ms": 120
+      },
+      "raw_request_metadata": {
+        "message_shape": "Qwen typed content list",
+        "media_types": [
+          "audio",
+          "video",
+          "text"
+        ],
+        "audio_input": {
+          "type": "audio",
+          "path": ".sisyphus/evidence/audio-fixtures/av_sync.wav",
+          "bytes": 108844,
+          "mime_type": "audio/wav",
+          "transport": "typed_local_path_direct_media"
+        },
+        "video_input": {
+          "type": "video",
+          "path": ".sisyphus/evidence/audio-fixtures/av_sync.mp4",
+          "bytes": 2056,
+          "mime_type": "video/mp4",
+          "video_audio_policy": "muted_video_track_only; audio is supplied explicitly as WAV",
+          "transport": "typed_local_path_direct_media"
+        },
+        "text_prompt_chars": 157,
+        "transcript_text_used": false,
+        "use_audio_in_video": false
+      },
+      "raw_model_answer": "```json\n{\n  \"probe\": \"audio\",\n  \"sync_events\": [\n    {\n      \"type\": \"tone\",\n      \"start_time\": 0.0,\n      \"end_time\": 1.4,\n      \"description\": \"A beep sound\"\n    }\n  ],\n  \"alignment\": {\n    \"tones\": [\n      {\n        \"start_time\": 0.0,\n        \"end_time\": 1.4\n      }\n    ],\n    \"visual_flashes\": []\n  }\n}\n```",
+      "normalized": {
+        "status": "PASS",
+        "mode": "model_response",
+        "matched_expected_substrings": [
+          "sync",
+          "align",
+          "flash"
+        ],
+        "matched_negative_substrings": []
+      },
+      "event_response_latency_ms": 1945.397
+    },
+    {
+      "name": "cross_modal_event",
+      "status": "PASS",
+      "prompt": "Detect the combined event in the muted video plus explicit WAV audio. The target is a sky-look visual cue concurrent with an ah-like vocal tone. Return compact JSON with keys probe, cross_modal_event, event_time_ms, response.",
+      "expected_answer": "sky look plus ah tone",
+      "expected_substrings": [
+        "sky",
+        "look",
+        "ah",
+        "event"
+      ],
+      "negative_substrings": [
+        "silent",
+        "no audio",
+        "audio only"
+      ],
+      "event_timing_ms": {
+        "target_event_start_ms": 1600,
+        "target_event_end_ms": 2600,
+        "audio_cue_ms": 1700,
+        "visual_cue_ms": 1600,
+        "response_budget_ms": 2000
+      },
+      "raw_request_metadata": {
+        "message_shape": "Qwen typed content list",
+        "media_types": [
+          "audio",
+          "video",
+          "text"
+        ],
+        "audio_input": {
+          "type": "audio",
+          "path": ".sisyphus/evidence/audio-fixtures/cross_modal_event.wav",
+          "bytes": 134444,
+          "mime_type": "audio/wav",
+          "transport": "typed_local_path_direct_media"
+        },
+        "video_input": {
+          "type": "video",
+          "path": ".sisyphus/evidence/audio-fixtures/cross_modal_event.mp4",
+          "bytes": 2091,
+          "mime_type": "video/mp4",
+          "video_audio_policy": "muted_video_track_only; audio is supplied explicitly as WAV",
+          "transport": "typed_local_path_direct_media"
+        },
+        "text_prompt_chars": 225,
+        "transcript_text_used": false,
+        "use_audio_in_video": false
+      },
+      "raw_model_answer": "```json\n{\n  \"probe\": \"a sky-look visual cue\",\n  \"cross_modal_event\": \"an ah-like vocal tone\",\n  \"event_time_ms\": \"0-200\",\n  \"response\": \"a muted video\"\n}\n```",
+      "normalized": {
+        "status": "PASS",
+        "mode": "model_response",
+        "matched_expected_substrings": [
+          "sky",
+          "look",
+          "ah",
+          "event"
+        ],
+        "matched_negative_substrings": []
+      },
+      "event_response_latency_ms": 1113.692
+    }
+  ],
+  "sequence_summary": {
+    "selected_model": null,
+    "model": "Qwen/Qwen2.5-Omni-3B",
+    "primary_model": "Qwen/Qwen2.5-Omni-7B-GPTQ-Int4",
+    "required_statuses": {
+      "audio_positive": "FAIL",
+      "no_audio_ablation": "FAIL",
+      "beep_only": "PASS",
+      "korean_phrase": "FAIL",
+      "av_sync": "PASS",
+      "event_response_ms": 1113.692,
+      "event_response_budget_ms": 2000,
+      "cross_modal_event": "PASS"
+    },
+    "all_required_passed": false
+  }
+}

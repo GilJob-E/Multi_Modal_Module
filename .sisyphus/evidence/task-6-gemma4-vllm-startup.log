@@ -1,0 +1,82 @@
+# SUPERSEDED EVIDENCE NOTICE
+# This startup log is historical and superseded by the final Task 6 gate artifacts.
+# Do not use the older pass/allowance lines below as current state.
+# Current final gate: .sisyphus/evidence/vid0033-native-proof-gate.json
+# Current status: gemma4_capability_no_go
+# Current streaming_refactor_allowed: false
+# Superseding evidence: .sisyphus/evidence/vid0033-gemma4-native-proof.json, .sisyphus/evidence/task-7-9-streaming-refactor-blocked.json, .sisyphus/evidence/task-10-final-state.md
+
+
+## Task 6 Gemma4 Real-Video Native Proof Gate
+started_at=2026-05-21T18:38:32.706436+00:00
+model_order=['google/gemma-4-E4B-it', 'google/gemma-4-E2B-it']
+port=8002
+readiness_timeout_s=3600
+proof_out=.sisyphus/evidence/vid0033-gemma4-native-proof.json
+gate_out=.sisyphus/evidence/vid0033-native-proof-gate.json
+HF_TOKEN source: environment
+vLLM image selected: vllm/vllm-openai:nightly
+
+## Candidate google/gemma-4-E4B-it
+launch_command=docker run -d --name vllm-gemma4-e4b-task6-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E4B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {"video":1,"audio":1,"image":4} --allowed-local-media-path /workspace/gje --dtype bfloat16
+container vllm-gemma4-e4b-task6-port8002 absent before cleanup
+prelaunch cleanup for task container: container vllm-gemma4-e4b-task6-port8002 absent before cleanup
+$ docker run -d --name vllm-gemma4-e4b-task6-port8002 --gpus all --ipc=host --shm-size 16G -p 127.0.0.1:8002:8000 -v /home/kio/hf_cache:/root/.cache/huggingface -v /home/kio/workspace/gje:/workspace/gje:ro -e VLLM_ENGINE_READY_TIMEOUT_S=3600 -e HF_TOKEN=<HF_TOKEN_REDACTED> vllm/vllm-openai:nightly --host 0.0.0.0 --port 8000 --model google/gemma-4-E4B-it --tensor-parallel-size 1 --max-model-len 4096 --max-num-batched-tokens 8192 --gpu-memory-utilization 0.90 --limit-mm-per-prompt {"video":1,"audio":1,"image":4} --allowed-local-media-path /workspace/gje --dtype bfloat16
+exit_code=0
+stdout:
+103fbbc6df8d2827e3810c92b3f9989cbed66cb78924fed3d46554b75b57b6e1
+readiness /v1/models: HTTP 200
+{"object":"list","data":[{"id":"google/gemma-4-E4B-it","object":"model","created":1779390052,"owned_by":"vllm","root":"google/gemma-4-E4B-it","parent":null,"max_model_len":4096,"permission":[{"id":"modelperm-93608f54fc6cb290","object":"model_permission","created":1779390052,"allow_create_engine":false,"allow_sampling":true,"allow_logprobs":true,"allow_search_indices":false,"allow_view":true,"allow_fine_tuning":false,"organization":"*","group":null,"is_blocking":false}]}]}
+
+## Native real-video proof google/gemma-4-E4B-it
+$ /usr/bin/python3 local-infer/tools/probe_gemma4_real_video.py --base-url http://localhost:8002 --model google/gemma-4-E4B-it --video-url file:///workspace/gje/vid_0033.mp4 --ground-truth .sisyphus/evidence/vid0033-ground-truth.json --out .sisyphus/evidence/vid0033-gemma4-native-proof.json --timeout 900
+exit_code=0
+stdout:
+{
+  "out": ".sisyphus/evidence/vid0033-gemma4-native-proof.json",
+  "status": "gemma4_native_real_video_pass",
+  "no_go_type": null
+}
+
+## Native proof verifier
+$ /usr/bin/python3 local-infer/tools/verify_vid0033_native_proof.py --proof .sisyphus/evidence/vid0033-gemma4-native-proof.json --out .sisyphus/evidence/vid0033-native-proof-gate.json
+exit_code=0
+stdout:
+{
+  "status": "gemma4_native_real_video_pass",
+  "streaming_refactor_allowed": true,
+  "reasons": [
+    "pass artifact satisfies the locked proof contract"
+  ],
+  "checked_at": "2026-05-21T19:00:57.087101+00:00",
+  "proof_path": ".sisyphus/evidence/vid0033-gemma4-native-proof.json",
+  "forbidden_path_checks": {
+    "status": "PASS",
+    "checked_terms": [
+      "qwen",
+      "generate-av-fallback",
+      "/audio",
+      "/frames",
+      "audio_analysis",
+      "cross_modal_event",
+      "sample30.mp4",
+      "native_success=false"
+    ],
+    "violations": []
+  },
+  "locked_statuses": [
+    "gemma4_capability_no_go",
+    "gemma4_native_real_video_pass",
+    "proof_invalid",
+    "schema_media_failure",
+    "serving_runtime_unresolved"
+  ]
+}
+$ docker stop vllm-gemma4-e4b-task6-port8002
+exit_code=0
+stdout:
+vllm-gemma4-e4b-task6-port8002
+$ docker rm vllm-gemma4-e4b-task6-port8002
+exit_code=0
+stdout:
+vllm-gemma4-e4b-task6-port8002
