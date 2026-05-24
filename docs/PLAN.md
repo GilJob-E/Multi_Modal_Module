@@ -78,20 +78,16 @@
 남은 실질 작업은 ① living docs stale 교정(완료) ② Phase 3 JIT 복구 규칙
 명문화(아래)뿐. `native_audio.py`(audio_url 교정 + 30초 캡)는 Phase 1에서 이미 복구됨.
 
-## Phase 3 — 턴 단위 native 파이프라인 + periodic prefill
+## Phase 3 — 턴 단위 native 파이프라인 + periodic prefill ✅ 완료 (2026-05-24)
 
-- **세션 기반 엔드포인트**: 턴 진행 중 AV 윈도우 push → end-of-turn 트리거 → 평가 SSE 스트리밍.
-- **periodic prefill 기제**: `--enable-prefix-caching` 켠 상태에서, 턴 중 고정 system prompt prefix + 누적 AV 윈도우를 주기적으로 선전송해 vLLM이 prefix를 캐시 → 턴 종료 시 warm prefix 재사용으로 TTFT 최소화. (Phase 1이 동일 오디오 prefix 요청 간 재사용 0.03s로 실효 입증.)
-- **30초 오디오 캡 ↔ 긴 답변**: rolling window 전략으로 화해(최근 윈도우 기준 평가 + 누적 요약).
-- **검증된 레시피 기준선**: 전송 = 샘플 `image_url` 프레임 + `audio_url` + text(스파이크 그대로). payload는 **인라인으로** 만든다 — `native_payloads.py` 원형 복구 금지(video_url 모양이라 부적합).
-- **JIT 복구 규칙** (Phase 2 흡수분): 베이스라인에서 import 시점에만 꺼낸다.
-  `git show f80e447:local-infer/src/local_infer/<f>.py` → `src/local_infer/<f>.py`
-  (경로 리맵 `local-infer/src/local_infer/` → `src/local_infer/`). 무조건 필요(검증
-  완료, cruft import 없음 확인): `vllm_client.py`(32줄, `requests`+`vllm_stream`),
-  `vllm_stream.py`(25줄, stdlib), `frame_store.py`(55줄, stdlib). 신규는 prefill
-  워밍 루프 + 턴 트리거 로직 + 서비스 골격(`app.py`, `pyproject.toml`)만.
-- **video_url 재고 조건**: `native_media_store.py`·`native_payloads.py`는
-  Phase 3에서 video_url 전송을 별도 실측한 뒤에만 복구를 검토.
+**결과: periodic prefill 실효 정량 입증 — end-of-turn TTFT warm-off 1.226s → warm-on 0.039s (31.5배 단축), 평가 품질(verbal/vocal/visual + prosody) 회귀 없음.** 결과물 표면은 파이썬 평가자 + 하니스(FastAPI HTTP는 소비자 생기면 얇게, 범위 밖). 증거 `.sisyphus/evidence/phase3-prefill-effect.json`. 아래는 수행 기록.
+
+- **평가자 인터페이스** (`src/local_infer/native_eval.py`): `NativeInterviewEvaluator` — `add_frame`/`set_audio_window`(턴 중 push) → `warm`(prefix 캐시 프라임) → `evaluate`(SSE 스트리밍). vLLM은 평가자 뒤에 숨김(성공 기준 #4).
+- **periodic prefill 기제** (실측): 평가 루브릭을 **system 프롬프트에 고정**, user 턴 = `[image_url 프레임…, audio_url, 고정 text]`. warm(max_tokens=1)과 evaluate가 **전체 prefix를 공유** → `--enable-prefix-caching` 풀히트. **핵심: warm/evaluate는 동일 프레임·오디오 객체를 재사용해야 토큰이 일치해 캐시가 맞는다**(재추출하면 미스). "periodic" = push마다 warm.
+- **검증된 레시피 기준선**: 전송 = 샘플 `image_url` 프레임 + `audio_url` + 고정 text(스파이크 그대로). payload는 **인라인으로** 빌드(`native_payloads.py` 원형 복구 안 함 — video_url 모양이라 부적합).
+- **JIT 복구 완료** (f80e447 → `src/local_infer/`, verbatim, cruft import 없음 확인): `vllm_client.py`, `vllm_stream.py`, `frame_store.py`. `pyproject.toml`은 `requests`만(HTTP 미구현이라 fastapi/uvicorn 제외).
+- **30초 오디오 캡 ↔ 긴 답변**: rolling window(최근 윈도우 + 누적 요약)는 **미구현 — 범위 밖**(코어는 최신 ≤30초 윈도우만 평가). 추후 refinement.
+- **video_url 재고 조건**: `native_media_store.py`·`native_payloads.py`는 video_url 전송을 별도 실측한 뒤에만 복구 검토(현재 미사용).
 - 아키텍처: (1) 단일 E4B native AV 확정(Phase 1) — 2-스테이지 분기 폐기.
 
 ## Phase 4 — 검증
