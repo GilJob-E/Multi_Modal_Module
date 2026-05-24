@@ -25,7 +25,15 @@
 
 ## 현재 상태
 
-재시작 직후. 다음 단계는 **Phase 1 검증 스파이크**(`docs/PLAN.md`) — E4B native AV 동작·품질·prosody를 실측해 아키텍처(단일 E4B vs 2-스테이지)를 확정한다.
+**Phase 1 검증 스파이크 완료(2026-05-24) → 아키텍처 (1) 단일 E4B native AV 확정.**
+`audio_url`(data URL) 규격 + `vllm[audio]` 파생 이미지로 E4B가 native AV를 HTTP 200
+처리, prosody 묘사·평가 깊이·prefix 캐시 재사용 모두 실측 통과(증거
+`.sisyphus/evidence/spike-e4b-native-av.json`). 이전 audio "no-go"는 모델 천장이
+아니라 payload 버그였음 확인. 검증된 전송 = 샘플 프레임(`image_url`) + `audio_url`.
+
+다음 단계는 **Phase 3 — 턴 단위 native 파이프라인 + periodic prefill**(`docs/PLAN.md`).
+Phase 2(군더더기 절단)는 폐지하고 Phase 3 JIT 복구로 흡수했다(wipe가 이미 cruft를
+비웠고, 검증된 경로가 video_url 복구 목록과 어긋나기 때문).
 
 ## 디렉터리
 

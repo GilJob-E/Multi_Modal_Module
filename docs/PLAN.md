@@ -60,27 +60,45 @@
 
 ---
 
-## Phase 2 — 군더더기 절단 & 깨끗한 토대
+## Phase 2 — 폐지 (Phase 3로 흡수, 2026-05-24)
 
-git 베이스라인(`f80e447`)에 복구 태그 부여 후:
-- **유지(재사용 인프라)**: `vllm_client.py`, `vllm_stream.py`, `frame_store.py`, `native_media_store.py`, `native_audio.py`, `experiments/phase0`, `video-test/`, `sglang/EXPERIMENT_LOG.md`.
-- **제거(cruft)**: `audio_analysis.py`, degraded fallback 엔드포인트(`/audio`, `/generate-av-fallback`), "user override native" disclaimer 레이어, 그리고 README/INFERENCE_PIPELINE/docs/DECISIONS의 "not native success / fallback is not proof" 방어 문서 더미. (히스토리는 git 베이스라인에 보존되므로 본문에서 삭제.)
-- **교정**: `native_payloads.py`를 `audio_url` 규격으로 확정.
-- **문서 재작성**: 3중 경로 미로를 버리고 단일 일관 아키텍처로 README/CLAUDE.md/ARCHITECTURE 재서술.
+원래 "군더더기 절단 & 깨끗한 토대"(배치 복구 + cruft 제거)였으나 두 전제가
+무너져 별도 단계를 두지 않는다:
+1. **재정의 wipe가 이미 cruft를 비웠다.** `audio_analysis.py`·fallback
+   엔드포인트(`/audio`, `/generate-av-fallback`)·disclaimer 레이어·"not native
+   success" 방어 문서는 작업트리에 없다 — "복구하지 않으면" 그만이라 제거 작업이
+   없다. (히스토리는 `f80e447`에 보존.)
+2. **검증된 경로가 복구 목록과 어긋난다.** 동작이 입증된 유일한 코드
+   `tools/spike_e4b_native_av.py`는 `NativeAudioExtractor` 하나만 import하고
+   payload는 인라인 dict로 만들며, 전송은 **샘플 `image_url` 프레임 + `audio_url`**다.
+   `video_url`은 쓰지 않는다. 따라서 `native_media_store.py`(MP4→`video_url` 전용)와
+   `native_payloads.py`(`video_url+audio` 하드코딩) 원형 복구는 **검증 안 된 video_url
+   전송을 미리 되살리는** speculative 작업 → 하지 않는다.
+
+남은 실질 작업은 ① living docs stale 교정(완료) ② Phase 3 JIT 복구 규칙
+명문화(아래)뿐. `native_audio.py`(audio_url 교정 + 30초 캡)는 Phase 1에서 이미 복구됨.
 
 ## Phase 3 — 턴 단위 native 파이프라인 + periodic prefill
 
 - **세션 기반 엔드포인트**: 턴 진행 중 AV 윈도우 push → end-of-turn 트리거 → 평가 SSE 스트리밍.
-- **periodic prefill 기제**: `--enable-prefix-caching` 켠 상태에서, 턴 중 고정 system prompt prefix + 누적 AV 윈도우를 주기적으로 선전송해 vLLM이 prefix를 캐시 → 턴 종료 시 warm prefix 재사용으로 TTFT 최소화. **(멀티모달 prefix 캐시가 요청 간 재사용되는지는 측정 대상; Phase0가 image_url 경로 warm 0.16–0.24s는 입증.)**
+- **periodic prefill 기제**: `--enable-prefix-caching` 켠 상태에서, 턴 중 고정 system prompt prefix + 누적 AV 윈도우를 주기적으로 선전송해 vLLM이 prefix를 캐시 → 턴 종료 시 warm prefix 재사용으로 TTFT 최소화. (Phase 1이 동일 오디오 prefix 요청 간 재사용 0.03s로 실효 입증.)
 - **30초 오디오 캡 ↔ 긴 답변**: rolling window 전략으로 화해(최근 윈도우 기준 평가 + 누적 요약).
-- **재사용 우선**: AV 윈도우는 `native_media_store`, 스트리밍은 `vllm_client`/`vllm_stream`. 신규는 prefill 워밍 루프 + 턴 트리거 로직만.
-- 아키텍처 분기: (1) 단일 E4B 1콜 / (2) E4B 추출 → fusion 모델 2단.
+- **검증된 레시피 기준선**: 전송 = 샘플 `image_url` 프레임 + `audio_url` + text(스파이크 그대로). payload는 **인라인으로** 만든다 — `native_payloads.py` 원형 복구 금지(video_url 모양이라 부적합).
+- **JIT 복구 규칙** (Phase 2 흡수분): 베이스라인에서 import 시점에만 꺼낸다.
+  `git show f80e447:local-infer/src/local_infer/<f>.py` → `src/local_infer/<f>.py`
+  (경로 리맵 `local-infer/src/local_infer/` → `src/local_infer/`). 무조건 필요(검증
+  완료, cruft import 없음 확인): `vllm_client.py`(32줄, `requests`+`vllm_stream`),
+  `vllm_stream.py`(25줄, stdlib), `frame_store.py`(55줄, stdlib). 신규는 prefill
+  워밍 루프 + 턴 트리거 로직 + 서비스 골격(`app.py`, `pyproject.toml`)만.
+- **video_url 재고 조건**: `native_media_store.py`·`native_payloads.py`는
+  Phase 3에서 video_url 전송을 별도 실측한 뒤에만 복구를 검토.
+- 아키텍처: (1) 단일 E4B native AV 확정(Phase 1) — 2-스테이지 분기 폐기.
 
 ## Phase 4 — 검증
 
 - 스파이크 루브릭을 완성 파이프라인에 재적용(품질 회귀 방지).
 - **periodic prefill 효과 측정**: 같은 턴을 prefill 워밍 on/off로 end-of-turn TTFT 비교 → 방법론이 실제로 지연을 줄이는지 정량 입증.
-- `PYTHONPATH=src uv run --with pytest --with httpx pytest tests -q` 전체 통과(군더더기 제거 후 테스트도 정리).
+- `PYTHONPATH=src uv run --with pytest --with httpx pytest tests -q` 전체 통과. 베이스라인 테스트(`test_native_payloads.py` 등)는 옛 `input_audio`/`video_url` 규격을 단언하므로 **그대로 복구 금지** — Phase 3에서 확정된 인라인 payload(프레임+audio_url)에 맞춰 새로 작성.
 
 ## Project-manager 스캐폴딩 (병행)
 
