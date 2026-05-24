@@ -34,11 +34,13 @@
 
 → Phase 1 스파이크에서 `audio_url` 규격 + 30초 클립으로 재검증한다.
 
-## 남은 실측 미지수
+## 실측 미지수 → Phase 1 스파이크(2026-05-24) 결과
 
-- E4B 단일 추론이 목표 평가 깊이에 도달하는가.
-- E4B가 prosody(음량/피치/단조로움)를 묘사하는가, 전사만 하는가.
-- vLLM 멀티모달 prefix 캐시가 요청 간 재사용되어 periodic prefill이 실효가 있는가.
+- E4B 단일 추론이 목표 평가 깊이에 도달하는가 → **YES**. verbal/vocal 평가가 구조·근거·개선점을 갖춤.
+- E4B가 prosody(음량/피치/단조로움)를 묘사하는가, 전사만 하는가 → **묘사함**(음량·속도·pause·억양·filler). 전사 아님.
+- vLLM 멀티모달 prefix 캐시가 요청 간 재사용되어 periodic prefill이 실효가 있는가 → **재사용됨**(2번째 호출 TTFT 0.03s). Phase 4에서 prefill on/off 정량화로 마무리.
+
+(상세·증거: `docs/DECISIONS.md` D5, `.sisyphus/evidence/spike-e4b-native-av.json`)
 
 ## 출처
 

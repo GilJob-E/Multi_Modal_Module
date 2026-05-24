@@ -24,7 +24,9 @@
 
 ---
 
-## Phase 1 — 검증 스파이크 (먼저, 아키텍처 확정용)
+## Phase 1 — 검증 스파이크 ✅ 완료 (2026-05-24)
+
+**결과: 아키텍처 (1) 단일 E4B native AV 확정.** audio_url 규격 + vllm[audio] 파생 이미지로 E4B가 native AV를 HTTP 200 처리, prosody 묘사·평가 깊이·prefix 캐시 재사용 모두 실측 통과(2-스테이지 분기 폐기). 상세 `docs/DECISIONS.md` D5, 증거 `.sisyphus/evidence/spike-e4b-native-av.json`. 아래는 수행 기록.
 
 목적: 문서로 못 정하는 경험적 미지수를 싸게 걷어내고 아키텍처 (1)단일 E4B vs (2)2-스테이지를 확정.
 

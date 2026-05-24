@@ -28,6 +28,22 @@
 - 최강 추론·시각은 **31B/26B-A4B**지만 **오디오 입력 불가**.
 - → 둘을 동시에 못 가짐. 아키텍처 (1) 단일 E4B vs (2) 2-스테이지(E4B 청각 → 26B/31B 융합)는 Phase 1 스파이크 결과로 확정. 상세는 `RESEARCH.md`.
 
+## D5. 아키텍처 = (1) 단일 E4B native AV (확정, Phase 1 스파이크 2026-05-24)
+
+스파이크 실측으로 D3의 분기를 (1)로 확정. 근거(증거 `.sisyphus/evidence/spike-e4b-native-av.json`):
+- `audio_url`(data URL) 규격 + `vllm[audio]` 파생 이미지로 E4B가 native AV를 HTTP 200 처리 — 이전 "no-go"는 모델 천장이 아니라 **`input_audio` payload + extras 누락** 버그였음 실측 확인.
+- E4B가 prosody(음량·속도·pause·억양)를 **전사가 아니라 실제 묘사**, verbal/vocal 평가 깊이 충분 → 2-스테이지 융합 불필요.
+- warm TTFT 0.03–0.38s. 동일 오디오 prefix가 요청 간 캐시 재사용됨(2번째 호출 0.03s) → **periodic prefill 실효성 직접 입증**.
+- 서빙: 파생 이미지 `vllm-gemma4-audio:local`(nightly + librosa/soundfile), E4B 단일 GPU ~22.7GB, `--limit-mm-per-prompt '{"image":4,"audio":1}' --enable-prefix-caching`.
+
+## 신규 코드 (Phase 1 산출물)
+
+| 경로 | 용도 |
+|---|---|
+| `src/local_infer/native_audio.py` | 베이스라인 복구 + `to_content_part` audio_url 교정 |
+| `tools/spike_e4b_native_av.py` | 스파이크 probe (스모크 + 풀 배터리) |
+| `sglang/launch-configs/vllm_e4b_audio.sh` + `Dockerfile.e4b-audio` | E4B+audio 서빙 |
+
 ## D4. GPU 위생 규칙
 
 모델 미사용 시 컨테이너 stop + `nvidia-smi`로 VRAM 해제 확인(GPU별 한 자릿수 MiB, util 0%).

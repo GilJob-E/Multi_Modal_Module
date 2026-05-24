@@ -1,0 +1,4 @@
+# vllm/vllm-openai:nightly 는 vllm[audio] extras(librosa, soundfile)가 없어
+# Gemma 4 오디오 입력 시 처리 불가. 오디오 의존성만 얹은 파생 이미지.
+FROM vllm/vllm-openai:nightly
+RUN pip install --no-cache-dir librosa soundfile
