@@ -5,7 +5,15 @@ description = "실시간 턴 단위 native 멀티모달 면접 평가 모듈 (vL
 requires-python = ">=3.11"
 dependencies = [
   "requests",
+  "fastapi",
+  "uvicorn",
 ]
+
+[project.optional-dependencies]
+test = ["httpx"]  # fastapi TestClient
+
+# 주: ffmpeg는 시스템 바이너리(window_assembly/clip_stream가 subprocess로 호출).
+# 로컬 개발은 system-site-packages venv 사용: uv venv --python /usr/bin/python3 --system-site-packages .venv
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
