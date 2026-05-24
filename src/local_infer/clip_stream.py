@@ -25,8 +25,23 @@ def extract_frames(clip: str | Path, *, start_s: float, dur_s: float, fps: float
         return [p.read_bytes() for p in sorted(Path(d).glob("f*.jpg"))]
 
 
+def has_audio(clip: str | Path) -> bool:
+    """클립에 오디오 스트림이 있는지."""
+    r = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries",
+         "stream=codec_type", "-of", "csv=p=0", str(clip)],
+        capture_output=True, text=True, timeout=15,
+    )
+    return "audio" in r.stdout
+
+
 def extract_pcm(clip: str | Path, *, start_s: float, dur_s: float, sample_rate: int = 16000) -> bytes:
-    """[start_s, start_s+dur_s) 구간의 16kHz mono Int16 raw PCM 바이트."""
+    """[start_s, start_s+dur_s) 구간의 16kHz mono Int16 raw PCM 바이트.
+
+    오디오 스트림이 없는 클립이면 b""를 반환한다(예외 대신).
+    """
+    if not has_audio(clip):
+        return b""
     cmd = [
         "ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error",
         "-ss", f"{start_s:.3f}", "-t", f"{dur_s:.3f}", "-i", str(clip),

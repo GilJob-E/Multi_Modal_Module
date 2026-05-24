@@ -1,0 +1,114 @@
+{
+  "clips": [
+    {
+      "clip": "vid_0001.mp4",
+      "duration_s": 43.5,
+      "frames": 43,
+      "signals": {
+        "nonverbal": 15,
+        "evaluation": 3
+      },
+      "nonverbal_latency_s": {
+        "n": 15,
+        "min": 0.4,
+        "max": 0.51,
+        "mean": 0.47
+      },
+      "evaluation_latency_s": {
+        "n": 3,
+        "min": 2.05,
+        "max": 3.89,
+        "mean": 2.69
+      },
+      "endofturn_finalize_s": 2.46,
+      "sample_nonverbal": {
+        "t": 1.5,
+        "window_s": 3.0,
+        "state": "engaged",
+        "intensity": 0.8,
+        "note": "maintaining eye contact and smiling"
+      },
+      "sample_evaluation": {
+        "window_start_s": 0.0,
+        "window_dur_s": 16.0,
+        "verbal": {
+          "logic": "논리적 흐름이 자연스럽다.",
+          "structure": "자기소개에 필요한 기본 요소들을 잘 갖추고 있다.",
+          "specificity": "전공과 학교 등 구체적인 정보가 포함되어 있다."
+        },
+        "vocal": {
+          "volume": "적절한 볼륨으로 말하고 있다.",
+          "pace": "말의 속도가 안정적이다.",
+          "pauses": "자연스러운 곳에서 잠시 멈추는 모습이 보인다.",
+          "intonation": "전반적으로 평이하고 자신감 있는 톤이다."
+        },
+        "visual": {
+          "eye_contact": "카메라를 응시하며 시선을 유지하고 있다.",
+          "posture": "바른 자세로 앉아 있다.",
+          "expression": "차분하고 자신감 있는 표정이다.",
+          "gesture_over_time": "특별한 제스처 없이 차분하게 이야기하고 있다."
+        },
+        "key_observations": [
+          "자기소개에 필요한 핵심 정보를 명확하게 전달하고 있다.",
+          "전반적으로 안정적이고 자신감 있는 인상을 준다.",
+          "말의 속도와 톤이 면접 상황에 적합하다."
+        ]
+      }
+    },
+    {
+      "clip": "vid_0033.mp4",
+      "duration_s": 50.3,
+      "frames": 50,
+      "signals": {
+        "nonverbal": 17,
+        "evaluation": 4
+      },
+      "nonverbal_latency_s": {
+        "n": 17,
+        "min": 0.45,
+        "max": 0.51,
+        "mean": 0.47
+      },
+      "evaluation_latency_s": {
+        "n": 4,
+        "min": 1.66,
+        "max": 4.65,
+        "mean": 3.66
+      },
+      "endofturn_finalize_s": 2.13,
+      "sample_nonverbal": {
+        "t": 1.5,
+        "window_s": 3.0,
+        "state": "confident",
+        "intensity": 0.8,
+        "note": "maintaining eye contact and good posture"
+      },
+      "sample_evaluation": {
+        "window_start_s": 0.0,
+        "window_dur_s": 16.0,
+        "verbal": {
+          "logic": "논리적 흐름이 자연스럽고 명확함",
+          "structure": "자기소개에 필요한 기본 요소들을 잘 갖추고 있음",
+          "specificity": "전공과 관심 분야를 구체적으로 언급함"
+        },
+        "vocal": {
+          "volume": "적절한 볼륨으로 안정적임",
+          "pace": "적당한 속도로 말하며 듣기 편안함",
+          "pauses": "자연스러운 곳에서 잠시 멈춤",
+          "intonation": "차분하고 자신감 있는 톤을 유지함"
+        },
+        "visual": {
+          "eye_contact": "카메라를 응시하며 안정적인 시선을 유지함",
+          "posture": "바른 자세로 앉아 있어 신뢰감을 줌",
+          "expression": "차분하고 진지한 표정을 유지함",
+          "gesture_over_time": "특별한 제스처 없이 차분하게 진행함"
+        },
+        "key_observations": [
+          "전반적으로 매우 안정적이고 자신감 있는 인상을 줌",
+          "자기소개에 필요한 핵심 정보를 빠짐없이 전달함",
+          "발음이 명확하고 듣기 편안함"
+        ]
+      }
+    }
+  ]
+}
