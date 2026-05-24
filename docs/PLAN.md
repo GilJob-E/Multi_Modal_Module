@@ -161,10 +161,10 @@ cold kill-test(D6)와 시각 스파이크(D7)로 thesis가 **periodic prefill �
 **목표 아키텍처:**
 - **청각/언어 트랙**: ≤30s 오디오 윈도우를 모델에 통째로(cold로 충족). 기동 시 더미 요청
   1회로 CUDA 그래프 선warm. 긴 답변은 rolling window(최신 윈도우 + 누적 요약) — 미구현.
-- **시각 트랙**: 발화 중 프레임을 일정 cadence(또는 모션/이벤트 정렬)로 샘플, **프레임별
-  단일 분석을 병렬·분산 처리**(프레임당 ~60ms)해 (t, 관찰) 타임라인을 누적. end-of-turn엔
-  **집계만** — crude run-collapse 대신 타임라인을 LLM에 줘 질적 시간동역학(제스처 빈도·
-  표현성·시선 이동·자세 변화)을 묘사하는 smart 집계기.
+- **시각 트랙 (holistic 기본, 2026-05-24 problem-solver 재프레이밍)**: 프레임 몇 장 +
+  오디오를 한 프롬프트에 줘 모델이 시선·태도·제스처를 통째로 *질적* 평가(north-star).
+  deliverable이 풍부한 질적 피드백이므로 이게 기본. *(프레임별 분석+집계는 정밀 시간추적이
+  하드 요구일 때만의 narrow fallback — 강등됨. D7 참조.)*
 - **융합**: end-of-turn에 audio 평가 + visual 타임라인 집계를 결합해 단일 verbal/vocal/
   visual 피드백.
 
@@ -173,8 +173,10 @@ cold kill-test(D6)와 시각 스파이크(D7)로 thesis가 **periodic prefill �
 - 30s 오디오 캡 ↔ 긴 답변 rolling window(품질/커버리지).
 - 라이브 캡처(웹캠/마이크 → VAD/end-of-turn → 프레임 cadence) 파이프라인 엔지니어링.
 
-**검증 우선순위(미정, 사용자와)**: ① smart 집계기 스파이크(타임라인→LLM 질적 묘사가
-crude collapse보다 나은가) ② `native_eval`에 프레임별+집계 통합 ③ 턴 파이프라인 재설계.
+**다음 작업(확정, 2026-05-24)**: 실제 면접 클립(vid_0001/vid_0033/video.mp4)에 **holistic
+native AV 평가**(프레임 3~5장 + 오디오 한 프롬프트 = 기존 `native_eval` 방식)를 돌려, 출력의
+**시선/고개/태도 + verbal/vocal 피드백을 루브릭으로 채점** — 손가락-카운트류 메트릭이 아니라
+deliverable 자체를 검증. product-관련 신호가 입증적으로 빠질 때만 그 신호 한정 프레임별 보강 고려.
 
 ## Project-manager 스캐폴딩 (병행)
 

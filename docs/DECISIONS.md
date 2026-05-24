@@ -53,7 +53,7 @@
 - **프레임별 단일호출 + 타임라인 집계**는 실제 제스처를 추적(선명한 것 ~6/10 회복).
 - latency: 프레임당 55~72ms, 73장 병렬 0.50s. **프레임은 턴 내내 도착 → 발화 중 분산처리, end-of-turn은 집계만(~0)** = incremental 처리의 진짜 자리(오디오와 대비, D6).
 - 잔여 천장 = **인접값 카운팅 fidelity**(4 vs 5 엄지, 9 vs 10). 선명한 프레임에서도 나는 모델/해상도 한계 — 정확 카운트엔 블로커, 질적 body-language엔 허용. 정확 카운트가 필요하면 고해상도/전용 손모델(=모델 교체급, 범위 밖).
-- **결론**: 시각 트랙은 프레임 덤프 대신 프레임별+집계로 설계. 집계기는 (t,count/caption) 타임라인을 LLM에 줘 질적 시간동역학을 묘사하는 방향(미구현, 다음 작업).
+- **결론(2026-05-24 problem-solver 재프레이밍으로 정정)**: 시각 트랙의 기본은 **holistic native 평가**(프레임 몇 장+오디오 한 프롬프트로 모델이 시선·태도·제스처를 통째로 질적 평가)다. deliverable이 "풍부한 *질적* 피드백"이고, 그건 native 통째 이해의 영역(north-star). 위 손가락 실험이 보인 다중이미지 binding 한계는 **미세 시간축 시퀀스 복원**에만 적용되는데, 그건 product가 요구하는 신호가 아니다("정밀-프로브 실패 ≠ holistic 부적합" — 혼동 주의). **프레임별 분석+집계는 정밀 시간추적이 하드 요구일 때만의 narrow fallback으로 강등** — 게다가 그 자체가 저수준 feature extraction의 LLM 버전이라 native 원칙과 긴장한다(smart 집계기 스파이크에서 naive 집계는 echo만 함도 확인, 증거 `spike-visual-aggregator.json`). **다음**: 실제 클립에 holistic 평가를 돌려 시선/고개/태도 피드백을 루브릭으로 채점(deliverable 직접 검증).
 
 ## 신규 코드 (Phase 1 산출물)
 
@@ -65,6 +65,7 @@
 | `tools/spike_cold_prefill.py` | D6 cold kill-test (오디오 cold 바닥 + confirm) |
 | `tools/spike_visual_fingers.py` | D7 다중이미지 binding 한계 진단 |
 | `tools/spike_visual_temporal_v2.py` | D7 프레임별+집계 아키텍처 검증 |
+| `tools/spike_visual_aggregator.py` | D7 smart 집계기 검증(naive 집계 echo 한계 + 시선/고개 GT 부재) |
 
 ## D4. GPU 위생 규칙
 
