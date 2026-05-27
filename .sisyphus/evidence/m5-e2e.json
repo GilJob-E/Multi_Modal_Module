@@ -11,49 +11,219 @@
       "nonverbal_latency_s": {
         "n": 15,
         "min": 0.4,
-        "max": 0.51,
-        "mean": 0.47
+        "max": 1.57,
+        "mean": 0.54
       },
       "evaluation_latency_s": {
         "n": 3,
         "min": 2.05,
-        "max": 3.89,
-        "mean": 2.69
+        "max": 4.42,
+        "mean": 2.86
       },
-      "endofturn_finalize_s": 2.46,
-      "sample_nonverbal": {
-        "t": 1.5,
-        "window_s": 3.0,
-        "state": "engaged",
-        "intensity": 0.8,
-        "note": "maintaining eye contact and smiling"
-      },
-      "sample_evaluation": {
-        "window_start_s": 0.0,
-        "window_dur_s": 16.0,
-        "verbal": {
-          "logic": "논리적 흐름이 자연스럽다.",
-          "structure": "자기소개에 필요한 기본 요소들을 잘 갖추고 있다.",
-          "specificity": "전공과 학교 등 구체적인 정보가 포함되어 있다."
+      "endofturn_finalize_s": 2.44,
+      "timeline": [
+        {
+          "channel": "nonverbal",
+          "t": 1.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and smiling"
         },
-        "vocal": {
-          "volume": "적절한 볼륨으로 말하고 있다.",
-          "pace": "말의 속도가 안정적이다.",
-          "pauses": "자연스러운 곳에서 잠시 멈추는 모습이 보인다.",
-          "intonation": "전반적으로 평이하고 자신감 있는 톤이다."
+        {
+          "channel": "nonverbal",
+          "t": 4.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
         },
-        "visual": {
-          "eye_contact": "카메라를 응시하며 시선을 유지하고 있다.",
-          "posture": "바른 자세로 앉아 있다.",
-          "expression": "차분하고 자신감 있는 표정이다.",
-          "gesture_over_time": "특별한 제스처 없이 차분하게 이야기하고 있다."
+        {
+          "channel": "nonverbal",
+          "t": 7.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
         },
-        "key_observations": [
-          "자기소개에 필요한 핵심 정보를 명확하게 전달하고 있다.",
-          "전반적으로 안정적이고 자신감 있는 인상을 준다.",
-          "말의 속도와 톤이 면접 상황에 적합하다."
-        ]
-      }
+        {
+          "channel": "nonverbal",
+          "t": 10.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 13.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "leaning forward slightly"
+        },
+        {
+          "channel": "evaluation",
+          "window_start_s": 0.0,
+          "window_dur_s": 16.0,
+          "verbal": {
+            "logic": "논리적 흐름이 자연스럽다.",
+            "structure": "자기소개에 필요한 핵심 정보(이름, 학년, 전공, 관심사)를 체계적으로 전달하고 있다.",
+            "specificity": "소속 대학과 전공을 구체적으로 언급하여 신뢰도를 높인다."
+          },
+          "vocal": {
+            "volume": "적절한 볼륨으로 또렷하게 말하고 있다.",
+            "pace": "적당한 속도로 말하고 있어 듣기 편안하다.",
+            "pauses": "자연스러운 곳에서 잠시 멈추며 호흡을 조절하고 있다.",
+            "intonation": "전반적으로 안정적이고 자신감 있는 억양을 사용하고 있다."
+          },
+          "visual": {
+            "eye_contact": "카메라를 응시하며 안정적인 시선을 유지하고 있다.",
+            "posture": "바른 자세로 앉아 있어 자신감 있는 인상을 준다.",
+            "expression": "차분하고 진지한 표정으로 인터뷰에 임하고 있다.",
+            "gesture_over_time": "특별한 제스처 없이 차분하게 말하고 있다."
+          },
+          "key_observations": [
+            "자기소개에 필요한 모든 요소를 포함하고 있다.",
+            "전반적으로 자신감 있고 준비된 인상을 준다.",
+            "발음이 명확하고 전달력이 좋다."
+          ]
+        },
+        {
+          "channel": "nonverbal",
+          "t": 16.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and leaning slightly forward"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 19.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 22.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "leaning forward slightly"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 25.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and speaking clearly"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 28.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "leaning forward slightly"
+        },
+        {
+          "channel": "evaluation",
+          "window_start_s": 16.0,
+          "window_dur_s": 16.0,
+          "verbal": {
+            "logic": "일관성 있음",
+            "structure": "자연스러움",
+            "specificity": "보통"
+          },
+          "vocal": {
+            "volume": "적절함",
+            "pace": "보통",
+            "pauses": "적절함",
+            "intonation": "자연스러움"
+          },
+          "visual": {
+            "eye_contact": "적절함",
+            "posture": "편안함",
+            "expression": "차분함",
+            "gesture_over_time": "없음"
+          },
+          "key_observations": [
+            "전반적으로 안정적인 답변을 제공함",
+            "말의 속도와 톤이 자연스러움",
+            "시선 처리가 안정적임"
+          ]
+        },
+        {
+          "channel": "nonverbal",
+          "t": 31.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and smiling"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 34.5,
+          "window_s": 3.0,
+          "state": "confident",
+          "intensity": 0.8,
+          "note": "Smiling and making direct eye contact"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 37.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and speaking clearly"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 40.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and speaking with enthusiasm"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 42.7340025,
+          "window_s": 1.468004999999998,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "evaluation",
+          "window_start_s": 32.0,
+          "window_dur_s": 11.468004999999998,
+          "verbal": {
+            "logic": "일관성 있음",
+            "structure": "간결함",
+            "specificity": "구체적이지 않음"
+          },
+          "vocal": {
+            "volume": "적절함",
+            "pace": "보통",
+            "pauses": "적절함",
+            "intonation": "자연스러움"
+          },
+          "visual": {
+            "eye_contact": "적절함",
+            "posture": "편안함",
+            "expression": "밝음",
+            "gesture_over_time": "없음"
+          },
+          "key_observations": [
+            "전반적으로 자신감 있는 태도를 보임",
+            "말의 흐름이 자연스럽고 부드러움",
+            "시선 처리가 안정적임"
+          ]
+        }
+      ]
     },
     {
       "clip": "vid_0033.mp4",
@@ -71,44 +241,257 @@
       },
       "evaluation_latency_s": {
         "n": 4,
-        "min": 1.66,
-        "max": 4.65,
-        "mean": 3.66
+        "min": 1.64,
+        "max": 4.68,
+        "mean": 3.82
       },
-      "endofturn_finalize_s": 2.13,
-      "sample_nonverbal": {
-        "t": 1.5,
-        "window_s": 3.0,
-        "state": "confident",
-        "intensity": 0.8,
-        "note": "maintaining eye contact and good posture"
-      },
-      "sample_evaluation": {
-        "window_start_s": 0.0,
-        "window_dur_s": 16.0,
-        "verbal": {
-          "logic": "논리적 흐름이 자연스럽고 명확함",
-          "structure": "자기소개에 필요한 기본 요소들을 잘 갖추고 있음",
-          "specificity": "전공과 관심 분야를 구체적으로 언급함"
+      "endofturn_finalize_s": 2.12,
+      "timeline": [
+        {
+          "channel": "nonverbal",
+          "t": 1.5,
+          "window_s": 3.0,
+          "state": "confident",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
         },
-        "vocal": {
-          "volume": "적절한 볼륨으로 안정적임",
-          "pace": "적당한 속도로 말하며 듣기 편안함",
-          "pauses": "자연스러운 곳에서 잠시 멈춤",
-          "intonation": "차분하고 자신감 있는 톤을 유지함"
+        {
+          "channel": "nonverbal",
+          "t": 4.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
         },
-        "visual": {
-          "eye_contact": "카메라를 응시하며 안정적인 시선을 유지함",
-          "posture": "바른 자세로 앉아 있어 신뢰감을 줌",
-          "expression": "차분하고 진지한 표정을 유지함",
-          "gesture_over_time": "특별한 제스처 없이 차분하게 진행함"
+        {
+          "channel": "nonverbal",
+          "t": 7.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
         },
-        "key_observations": [
-          "전반적으로 매우 안정적이고 자신감 있는 인상을 줌",
-          "자기소개에 필요한 핵심 정보를 빠짐없이 전달함",
-          "발음이 명확하고 듣기 편안함"
-        ]
-      }
+        {
+          "channel": "nonverbal",
+          "t": 10.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 13.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "leaning forward slightly"
+        },
+        {
+          "channel": "evaluation",
+          "window_start_s": 0.0,
+          "window_dur_s": 16.0,
+          "verbal": {
+            "logic": "논리적 흐름이 자연스럽고 명확함",
+            "structure": "자기소개에 필요한 핵심 정보(이름, 학력, 전공, 관심 분야)를 체계적으로 전달함",
+            "specificity": "구체적인 전공(인공지능, 머신러닝)과 학교(마니팔 대학교)를 언급하여 전문성을 보여줌"
+          },
+          "vocal": {
+            "volume": "적절한 볼륨으로 안정적으로 말함",
+            "pace": "적당한 속도로 말하며 듣기 편안함",
+            "pauses": "자연스러운 곳에서 잠시 멈추며 생각할 시간을 가짐",
+            "intonation": "차분하고 자신감 있는 톤으로 말함"
+          },
+          "visual": {
+            "eye_contact": "카메라를 응시하며 안정적인 시선을 유지함",
+            "posture": "바른 자세로 앉아 있어 자신감 있는 인상을 줌",
+            "expression": "차분하고 진지한 표정으로 답변에 집중하는 모습을 보임",
+            "gesture_over_time": "특별한 제스처 없이 차분하게 답변에 집중함"
+          },
+          "key_observations": [
+            "전반적으로 매우 안정적이고 프로페셔널한 인상을 줌",
+            "자기소개에 필요한 모든 요소를 빠짐없이 포함함",
+            "자신감 있는 태도가 돋보임"
+          ]
+        },
+        {
+          "channel": "nonverbal",
+          "t": 16.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 19.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and speaking clearly"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 22.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 25.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 28.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "evaluation",
+          "window_start_s": 16.0,
+          "window_dur_s": 16.0,
+          "verbal": {
+            "logic": "논리적 흐름이 자연스럽고 일관성이 있다.",
+            "structure": "경력과 관심사를 명확하게 구분하여 설명하고 있다.",
+            "specificity": "구체적인 프로젝트(드러우즈니스 감지, 감성 분석)와 경험(머신러닝 인턴, 웹 개발자 인턴)을 언급하여 구체적이다."
+          },
+          "vocal": {
+            "volume": "적절한 볼륨으로 안정적으로 말하고 있다.",
+            "pace": "적당한 속도로 말하고 있어 듣기 편안하다.",
+            "pauses": "자연스러운 곳에서 잠시 멈추며 생각하는 듯한 인상을 준다.",
+            "intonation": "전반적으로 차분하고 자신감 있는 톤을 유지하고 있다."
+          },
+          "visual": {
+            "eye_contact": "카메라를 응시하며 안정적인 아이 컨택트를 유지하고 있다.",
+            "posture": "바른 자세로 앉아 있어 프로페셔널한 인상을 준다.",
+            "expression": "차분하고 진지한 표정으로 답변에 집중하고 있다.",
+            "gesture_over_time": "특별한 제스처 없이 차분하게 답변에 집중하고 있다."
+          },
+          "key_observations": [
+            "전반적으로 매우 안정적이고 자신감 있는 답변을 제공하고 있다.",
+            "경력과 기술에 대한 설명이 구체적이고 명확하다.",
+            "차분하고 진지한 태도가 인상적이다."
+          ]
+        },
+        {
+          "channel": "nonverbal",
+          "t": 31.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 34.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 37.5,
+          "window_s": 3.0,
+          "state": "confident",
+          "intensity": 0.8,
+          "note": "maintaining good eye contact and steady posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 40.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 43.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "nonverbal",
+          "t": 46.5,
+          "window_s": 3.0,
+          "state": "engaged",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "evaluation",
+          "window_start_s": 32.0,
+          "window_dur_s": 16.0,
+          "verbal": {
+            "logic": "논리적 흐름이 자연스럽고 일관성이 있다.",
+            "structure": "경험과 활동을 구체적으로 설명하며 구조가 명확하다.",
+            "specificity": "활동 내용(웹사이트 개발, 팀 관리)과 기간(6개월 이상)이 구체적으로 제시되었다."
+          },
+          "vocal": {
+            "volume": "적절한 볼륨으로 안정적으로 말하고 있다.",
+            "pace": "적당한 속도로 말하며 듣기 편안하다.",
+            "pauses": "자연스러운 곳에서 잠시 멈추며 생각할 시간을 갖는다.",
+            "intonation": "전반적으로 안정적이고 자신감 있는 억양을 사용한다."
+          },
+          "visual": {
+            "eye_contact": "카메라를 응시하며 안정적인 아이 컨택트를 유지한다.",
+            "posture": "바른 자세로 앉아 있어 자신감 있는 인상을 준다.",
+            "expression": "차분하고 진지한 표정으로 답변에 집중하고 있다.",
+            "gesture_over_time": "특별한 제스처 없이 차분하게 답변에 임하고 있다."
+          },
+          "key_observations": [
+            "전반적으로 자신감 있고 준비된 답변을 보여준다.",
+            "경험을 설명할 때 구체적인 역할과 성과를 언급하여 신뢰도를 높인다.",
+            "차분하고 안정적인 태도가 인상적이다."
+          ]
+        },
+        {
+          "channel": "nonverbal",
+          "t": 49.1430045,
+          "window_s": 2.286009,
+          "state": "attentive",
+          "intensity": 0.8,
+          "note": "maintaining eye contact and good posture"
+        },
+        {
+          "channel": "evaluation",
+          "window_start_s": 48.0,
+          "window_dur_s": 2.286009,
+          "verbal": {
+            "logic": "명확함",
+            "structure": "간결함",
+            "specificity": "보통"
+          },
+          "vocal": {
+            "volume": "적절함",
+            "pace": "보통",
+            "pauses": "없음",
+            "intonation": "평이함"
+          },
+          "visual": {
+            "eye_contact": "적절함",
+            "posture": "바름",
+            "expression": "진지함",
+            "gesture_over_time": "없음"
+          },
+          "key_observations": [
+            "전반적으로 안정적인 답변 태도를 보임",
+            "말의 속도가 일정하고 명확함",
+            "시선 처리가 안정적임"
+          ]
+        }
+      ]
     }
   ]
 }

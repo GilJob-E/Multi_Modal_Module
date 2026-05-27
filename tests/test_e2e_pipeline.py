@@ -92,13 +92,29 @@ def run_clip(clip: str, real_eval: WindowEvaluator) -> dict:
     n_ev = sum(1 for s in emitted if isinstance(s, EvaluationSignal))
     print(f"  신호: 비언어 {n_nv}, 평가 {n_ev} | 비언어지연 {_stats(nv)} | 평가지연 {_stats(ev)}")
     print(f"  end-of-turn 확정 지연: {finalize_s:.2f}s")
+
+    # 전체 타임라인(순서대로 모든 신호) + 콘솔에 변화 추적용 요약
+    timeline = []
+    for s in emitted:
+        ch = "nonverbal" if isinstance(s, NonVerbalSignal) else "evaluation"
+        timeline.append({"channel": ch, **s.to_dict()})
+    print("  ── 비언어 타임라인 (t: state/intensity) ──")
+    nv_line = "  " + " | ".join(
+        f"{e['t']:.0f}s:{e['state']}/{e['intensity']}" for e in timeline if e["channel"] == "nonverbal"
+    )
+    print(nv_line)
+    print("  ── 평가 윈도우별 verbal.logic / visual.expression ──")
+    for e in timeline:
+        if e["channel"] == "evaluation":
+            print(f"    [{e['window_start_s']:.0f}-{e['window_start_s']+e['window_dur_s']:.0f}s] "
+                  f"logic={e['verbal'].get('logic','')!r} expr={e['visual'].get('expression','')!r}")
+
     return {
         "clip": Path(clip).name, "duration_s": round(dur, 1),
         "frames": len(frames), "signals": {"nonverbal": n_nv, "evaluation": n_ev},
         "nonverbal_latency_s": _stats(nv), "evaluation_latency_s": _stats(ev),
         "endofturn_finalize_s": round(finalize_s, 2),
-        "sample_nonverbal": next((s.to_dict() for s in emitted if isinstance(s, NonVerbalSignal)), None),
-        "sample_evaluation": next((s.to_dict() for s in emitted if isinstance(s, EvaluationSignal)), None),
+        "timeline": timeline,
     }
 
 
