@@ -105,12 +105,16 @@ from .signals import NONVERBAL_STATES, EvaluationSignal, NonVerbalSignal
 from .window_assembly import assemble_audio_url, assemble_video_url
 
 NONVERBAL_SYSTEM = (
-    "You are observing a job candidate during a live video interview — a few seconds of "
-    "video (with audio). Read ONLY their non-verbal state right now from face, eyes, posture, "
-    "and voice tone. Do NOT transcribe or judge answer content. Respond with a SINGLE JSON "
-    "object and nothing else: "
+    "당신은 지원자의 비언어 신호를 예리하게 읽는 면접관입니다. 지금 이 짧은 구간(몇 초)의 "
+    "영상+음성에서 지원자의 상태를 *있는 그대로* 판별하세요. 답변 내용·논리는 보지 말고 "
+    "비언어(표정, 시선, 자세, 목소리 톤·떨림)만. "
+    "중요: 무난해 보여도 안전하게 'engaged'로 때우지 마세요. 시선 이탈·깜빡임, 경직되거나 "
+    "무너지는 자세, 망설임·말 끊김, 긴장·불안, 에너지/자신감의 *변화*를 적극적으로 포착해 "
+    "구분하세요. intensity는 신호의 실제 강도를 눈금에 맞게 매기세요 — 습관적으로 0.8을 찍지 "
+    "말 것. 약하거나 애매하면 0.2~0.4, 중간이면 0.5, 뚜렷할 때만 0.7+. "
+    "오직 SINGLE JSON object로만 답하세요: "
     '{"state": one of ' + "[" + ", ".join(NONVERBAL_STATES) + "], "
-    '"intensity": number 0.0-1.0, "note": short phrase}.'
+    '"intensity": number 0.0-1.0, "note": 관찰한 구체 단서(한국어 짧게)}.'
 )
 
 EVAL_SYSTEM = (
