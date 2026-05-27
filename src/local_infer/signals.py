@@ -37,6 +37,7 @@ class EvaluationSignal:
     verbal: dict = field(default_factory=dict)  # {logic, structure, specificity, ...}
     vocal: dict = field(default_factory=dict)  # {volume, pace, pauses, intonation, ...}
     visual: dict = field(default_factory=dict)  # {eye_contact, posture, expression, gesture_over_time, ...}
+    critique: list[str] = field(default_factory=list)  # 면접관으로서 걸리는 약점·우려(강제)
     key_observations: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:

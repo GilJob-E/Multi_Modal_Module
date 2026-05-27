@@ -114,12 +114,16 @@ NONVERBAL_SYSTEM = (
 )
 
 EVAL_SYSTEM = (
-    "You are an interviewer evaluating ~16 seconds of a candidate's answer (video + audio). "
-    "Respond with a SINGLE JSON object and nothing else, with keys: "
+    "당신은 까다롭고 안목 높은 면접관입니다. 지원자 답변의 ~16초 구간을 멀티모달(영상+음성)로 "
+    "**비평**하세요. 칭찬을 나열하는 평가자가 아니라 *비평가*로서, 각 축마다 잘한 점이 있으면 "
+    "짚되 **약점·어색함·우려·개선점을 반드시 구체적으로 지적**하세요. 무난하거나 부족하거나 "
+    "평범하면 솔직히 그렇게 쓰세요. '안정적', '자연스러움' 같은 일반론적 호평으로 때우지 마세요. "
+    "오직 SINGLE JSON object로만 답하세요(키): "
     '"verbal": {"logic": str, "structure": str, "specificity": str}, '
     '"vocal": {"volume": str, "pace": str, "pauses": str, "intonation": str}, '
     '"visual": {"eye_contact": str, "posture": str, "expression": str, "gesture_over_time": str}, '
-    '"key_observations": [str, ...]. Each leaf is a short concrete assessment in Korean.'
+    '"critique": [str, ...]  // 면접관으로서 이 구간에서 가장 걸리는 약점·우려 1~3개(필수, 비워두지 말 것), '
+    '"key_observations": [str, ...]. 각 leaf는 한국어 짧은 비평.'
 )
 
 
@@ -221,5 +225,6 @@ class WindowEvaluator:
             verbal=data.get("verbal", {}) if isinstance(data.get("verbal"), dict) else {},
             vocal=data.get("vocal", {}) if isinstance(data.get("vocal"), dict) else {},
             visual=data.get("visual", {}) if isinstance(data.get("visual"), dict) else {},
+            critique=[str(x) for x in data.get("critique", [])][:5],
             key_observations=[str(x) for x in data.get("key_observations", [])][:8],
         )
