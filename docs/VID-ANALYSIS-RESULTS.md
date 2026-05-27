@@ -1,58 +1,129 @@
-# 실제 면접 영상 분석 결과 (M5 전 윈도우 타임라인, 2026-05-24)
+# 윈도우별 리턴값 — 실측 원본 (M5)
 
-슬라이딩 윈도우 모듈을 실제 면접 답변 클립에 **GilJob 실조건(1fps + 16kHz)**으로 돌려
-**턴 전체의 per-window 신호**를 뽑은 결과. 증거: `.sisyphus/evidence/m5-e2e.json`.
+슬라이딩 윈도우 모듈을 실제 면접 클립에 1fps + 16kHz로 돌려 나온 per-window 신호 리턴값 전체. 해석·사견 없음. 증거: `.sisyphus/evidence/m5-e2e.json`.
 
-## 핵심 발견 — 비언어 신호가 거의 평평하다 (변별력 부족)
 
-전 윈도우 타임라인을 보니, 채널① 비언어 read가 **턴 내내 사실상 고정**이다:
+## vid_0001.mp4 — 43.5s, 프레임 43, 비언어 15 · 평가 3
+지연: 비언어 {'n': 15, 'min': 0.4, 'max': 1.57, 'mean': 0.54} · 평가 {'n': 3, 'min': 2.05, 'max': 4.42, 'mean': 2.86} · end-of-turn 확정 2.44s
 
-**vid_0001 (43.5s, 15 reads)** — `intensity`가 **전부 0.8**, state는 14×engaged + 1×confident:
+```json
+[0] {"channel": "nonverbal", "t": 1.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and smiling"}
 ```
-2s engaged/0.8 · 4s engaged/0.8 · 8s engaged/0.8 · … · 34s confident/0.8 · … · 43s engaged/0.8
+```json
+[1] {"channel": "nonverbal", "t": 4.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
 ```
-**vid_0033 (50.3s, 17 reads)** — `intensity` **전부 0.8**, state 대부분 engaged(+confident 2, attentive 1):
+```json
+[2] {"channel": "nonverbal", "t": 7.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
 ```
-2s confident/0.8 · 4s engaged/0.8 · … · 38s confident/0.8 · … · 49s attentive/0.8
+```json
+[3] {"channel": "nonverbal", "t": 10.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[4] {"channel": "nonverbal", "t": 13.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "leaning forward slightly"}
+```
+```json
+[5] {"channel": "evaluation", "window_start_s": 0.0, "window_dur_s": 16.0, "verbal": {"logic": "논리적 흐름이 자연스럽다.", "structure": "자기소개에 필요한 핵심 정보(이름, 학년, 전공, 관심사)를 체계적으로 전달하고 있다.", "specificity": "소속 대학과 전공을 구체적으로 언급하여 신뢰도를 높인다."}, "vocal": {"volume": "적절한 볼륨으로 또렷하게 말하고 있다.", "pace": "적당한 속도로 말하고 있어 듣기 편안하다.", "pauses": "자연스러운 곳에서 잠시 멈추며 호흡을 조절하고 있다.", "intonation": "전반적으로 안정적이고 자신감 있는 억양을 사용하고 있다."}, "visual": {"eye_contact": "카메라를 응시하며 안정적인 시선을 유지하고 있다.", "posture": "바른 자세로 앉아 있어 자신감 있는 인상을 준다.", "expression": "차분하고 진지한 표정으로 인터뷰에 임하고 있다.", "gesture_over_time": "특별한 제스처 없이 차분하게 말하고 있다."}, "key_observations": ["자기소개에 필요한 모든 요소를 포함하고 있다.", "전반적으로 자신감 있고 준비된 인상을 준다.", "발음이 명확하고 전달력이 좋다."]}
+```
+```json
+[6] {"channel": "nonverbal", "t": 16.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and leaning slightly forward"}
+```
+```json
+[7] {"channel": "nonverbal", "t": 19.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[8] {"channel": "nonverbal", "t": 22.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "leaning forward slightly"}
+```
+```json
+[9] {"channel": "nonverbal", "t": 25.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and speaking clearly"}
+```
+```json
+[10] {"channel": "nonverbal", "t": 28.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "leaning forward slightly"}
+```
+```json
+[11] {"channel": "evaluation", "window_start_s": 16.0, "window_dur_s": 16.0, "verbal": {"logic": "일관성 있음", "structure": "자연스러움", "specificity": "보통"}, "vocal": {"volume": "적절함", "pace": "보통", "pauses": "적절함", "intonation": "자연스러움"}, "visual": {"eye_contact": "적절함", "posture": "편안함", "expression": "차분함", "gesture_over_time": "없음"}, "key_observations": ["전반적으로 안정적인 답변을 제공함", "말의 속도와 톤이 자연스러움", "시선 처리가 안정적임"]}
+```
+```json
+[12] {"channel": "nonverbal", "t": 31.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and smiling"}
+```
+```json
+[13] {"channel": "nonverbal", "t": 34.5, "window_s": 3.0, "state": "confident", "intensity": 0.8, "note": "Smiling and making direct eye contact"}
+```
+```json
+[14] {"channel": "nonverbal", "t": 37.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and speaking clearly"}
+```
+```json
+[15] {"channel": "nonverbal", "t": 40.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and speaking with enthusiasm"}
+```
+```json
+[16] {"channel": "nonverbal", "t": 42.7340025, "window_s": 1.468004999999998, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[17] {"channel": "evaluation", "window_start_s": 32.0, "window_dur_s": 11.468004999999998, "verbal": {"logic": "일관성 있음", "structure": "간결함", "specificity": "구체적이지 않음"}, "vocal": {"volume": "적절함", "pace": "보통", "pauses": "적절함", "intonation": "자연스러움"}, "visual": {"eye_contact": "적절함", "posture": "편안함", "expression": "밝음", "gesture_over_time": "없음"}, "key_observations": ["전반적으로 자신감 있는 태도를 보임", "말의 흐름이 자연스럽고 부드러움", "시선 처리가 안정적임"]}
 ```
 
-→ **두 클립 32개 read의 intensity가 예외 없이 0.8.** state도 거의 engaged 고정. 이건
-*시간에 따라 변하는 신호*가 아니라 **거의 상수**다. **flat한 신호로는 면접관 아바타의
-*변하는* 비언어 반응(끄덕임↔갸우뚱)을 구동할 수 없다** — 모듈의 궁극 목적에 직격.
+## vid_0033.mp4 — 50.3s, 프레임 50, 비언어 17 · 평가 4
+지연: 비언어 {'n': 17, 'min': 0.45, 'max': 0.51, 'mean': 0.47} · 평가 {'n': 4, 'min': 1.64, 'max': 4.68, 'mean': 3.82} · end-of-turn 확정 2.12s
 
-intensity가 매번 정확히 `0.8`인 점은 모델이 *측정*이 아니라 **기본값으로 앵커링**하고 있음을
-강하게 시사한다.
-
-## 평가 채널② — 윈도우별 (다소 변하나 대체로 긍정 보일러플레이트)
-
-**vid_0001**: `[0-16s] logic="논리적 흐름 자연스럽다" expr="차분·진지"` → `[16-32s] logic="일관성 있음" expr="차분함"` → `[32-43s] logic="일관성 있음" expr="밝음"`
-**vid_0033**: 4 윈도우 모두 "논리적·일관성 있음 / 차분·진지한 표정으로 집중" — 거의 동일.
-
-→ 채널②는 ①보다는 약간 변동(끝 윈도우 "밝음")하나, 여전히 **대체로 긍정 보일러플레이트**.
-
-## 정직한 한계 — 무엇을 단정할 수 있고 없나
-- **단정 가능**: 현재 프롬프트로는 채널① intensity가 상수(0.8)이고 state가 거의 안 변한다 →
-  **변별력 부족**(측정된 사실).
-- **단정 불가**: "모델이 변별 *못* 한다" vs "두 지원자가 실제로 내내 안정적이었다"는 이 두
-  클립만으로 못 가린다. **둘 다 차분한 자기소개**라 진짜로 평탄했을 수도 있다. 단, intensity가
-  *정확히* 0.8 고정인 건 후자(실제 평탄)보다 전자(모델 default)를 시사.
-- **결정적 테스트(미수행)**: 시선 회피·긴장·자신감 하락이 **뚜렷한 대조 클립**을 넣어, 신호가
-  그때 *실제로 달라지는지* 본다. 달라지면 변별력 있음(이번 둘은 진짜 평탄), 그대로면 모델/프롬프트 한계.
-
-## 함의 (다음 작업의 핵심)
-이게 [[OPEN-DECISIONS]] #5(스키마 라벨 신뢰성)의 답을 절반 준다: **현 채널① 프롬프트는
-backchannel을 구동할 만큼 변별하지 못한다.** 출력 스키마 확정 전에:
-1. **대조 클립으로 변별력 결정 테스트** (위).
-2. 변별 안 되면 채널① 재설계 — 강제 대비(직전 윈도우 대비 변화량), intensity 캘리브레이션,
-   또는 더 짧은 윈도우/특정 단서(시선 이탈·자세 붕괴) 타게팅. (단 north-star: native 이해 유지, 저수준 feature 금지.)
-
-## 지연 (참고 — 견고)
-| 클립 | 비언어 지연 mean | 평가 지연 mean | end-of-turn 확정 |
-|---|---|---|---|
-| vid_0001 | 0.54s | 2.86s | 2.44s |
-| vid_0033 | 0.47s | 3.82s | 2.12s |
-
-## 재현
+```json
+[0] {"channel": "nonverbal", "t": 1.5, "window_s": 3.0, "state": "confident", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
 ```
-PYTHONPATH=src .venv/bin/python tests/test_e2e_pipeline.py   # 서버 필요(E4B+video:1)
+```json
+[1] {"channel": "nonverbal", "t": 4.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[2] {"channel": "nonverbal", "t": 7.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[3] {"channel": "nonverbal", "t": 10.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[4] {"channel": "nonverbal", "t": 13.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "leaning forward slightly"}
+```
+```json
+[5] {"channel": "evaluation", "window_start_s": 0.0, "window_dur_s": 16.0, "verbal": {"logic": "논리적 흐름이 자연스럽고 명확함", "structure": "자기소개에 필요한 핵심 정보(이름, 학력, 전공, 관심 분야)를 체계적으로 전달함", "specificity": "구체적인 전공(인공지능, 머신러닝)과 학교(마니팔 대학교)를 언급하여 전문성을 보여줌"}, "vocal": {"volume": "적절한 볼륨으로 안정적으로 말함", "pace": "적당한 속도로 말하며 듣기 편안함", "pauses": "자연스러운 곳에서 잠시 멈추며 생각할 시간을 가짐", "intonation": "차분하고 자신감 있는 톤으로 말함"}, "visual": {"eye_contact": "카메라를 응시하며 안정적인 시선을 유지함", "posture": "바른 자세로 앉아 있어 자신감 있는 인상을 줌", "expression": "차분하고 진지한 표정으로 답변에 집중하는 모습을 보임", "gesture_over_time": "특별한 제스처 없이 차분하게 답변에 집중함"}, "key_observations": ["전반적으로 매우 안정적이고 프로페셔널한 인상을 줌", "자기소개에 필요한 모든 요소를 빠짐없이 포함함", "자신감 있는 태도가 돋보임"]}
+```
+```json
+[6] {"channel": "nonverbal", "t": 16.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[7] {"channel": "nonverbal", "t": 19.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and speaking clearly"}
+```
+```json
+[8] {"channel": "nonverbal", "t": 22.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[9] {"channel": "nonverbal", "t": 25.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[10] {"channel": "nonverbal", "t": 28.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[11] {"channel": "evaluation", "window_start_s": 16.0, "window_dur_s": 16.0, "verbal": {"logic": "논리적 흐름이 자연스럽고 일관성이 있다.", "structure": "경력과 관심사를 명확하게 구분하여 설명하고 있다.", "specificity": "구체적인 프로젝트(드러우즈니스 감지, 감성 분석)와 경험(머신러닝 인턴, 웹 개발자 인턴)을 언급하여 구체적이다."}, "vocal": {"volume": "적절한 볼륨으로 안정적으로 말하고 있다.", "pace": "적당한 속도로 말하고 있어 듣기 편안하다.", "pauses": "자연스러운 곳에서 잠시 멈추며 생각하는 듯한 인상을 준다.", "intonation": "전반적으로 차분하고 자신감 있는 톤을 유지하고 있다."}, "visual": {"eye_contact": "카메라를 응시하며 안정적인 아이 컨택트를 유지하고 있다.", "posture": "바른 자세로 앉아 있어 프로페셔널한 인상을 준다.", "expression": "차분하고 진지한 표정으로 답변에 집중하고 있다.", "gesture_over_time": "특별한 제스처 없이 차분하게 답변에 집중하고 있다."}, "key_observations": ["전반적으로 매우 안정적이고 자신감 있는 답변을 제공하고 있다.", "경력과 기술에 대한 설명이 구체적이고 명확하다.", "차분하고 진지한 태도가 인상적이다."]}
+```
+```json
+[12] {"channel": "nonverbal", "t": 31.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[13] {"channel": "nonverbal", "t": 34.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[14] {"channel": "nonverbal", "t": 37.5, "window_s": 3.0, "state": "confident", "intensity": 0.8, "note": "maintaining good eye contact and steady posture"}
+```
+```json
+[15] {"channel": "nonverbal", "t": 40.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[16] {"channel": "nonverbal", "t": 43.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[17] {"channel": "nonverbal", "t": 46.5, "window_s": 3.0, "state": "engaged", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[18] {"channel": "evaluation", "window_start_s": 32.0, "window_dur_s": 16.0, "verbal": {"logic": "논리적 흐름이 자연스럽고 일관성이 있다.", "structure": "경험과 활동을 구체적으로 설명하며 구조가 명확하다.", "specificity": "활동 내용(웹사이트 개발, 팀 관리)과 기간(6개월 이상)이 구체적으로 제시되었다."}, "vocal": {"volume": "적절한 볼륨으로 안정적으로 말하고 있다.", "pace": "적당한 속도로 말하며 듣기 편안하다.", "pauses": "자연스러운 곳에서 잠시 멈추며 생각할 시간을 갖는다.", "intonation": "전반적으로 안정적이고 자신감 있는 억양을 사용한다."}, "visual": {"eye_contact": "카메라를 응시하며 안정적인 아이 컨택트를 유지한다.", "posture": "바른 자세로 앉아 있어 자신감 있는 인상을 준다.", "expression": "차분하고 진지한 표정으로 답변에 집중하고 있다.", "gesture_over_time": "특별한 제스처 없이 차분하게 답변에 임하고 있다."}, "key_observations": ["전반적으로 자신감 있고 준비된 답변을 보여준다.", "경험을 설명할 때 구체적인 역할과 성과를 언급하여 신뢰도를 높인다.", "차분하고 안정적인 태도가 인상적이다."]}
+```
+```json
+[19] {"channel": "nonverbal", "t": 49.1430045, "window_s": 2.286009, "state": "attentive", "intensity": 0.8, "note": "maintaining eye contact and good posture"}
+```
+```json
+[20] {"channel": "evaluation", "window_start_s": 48.0, "window_dur_s": 2.286009, "verbal": {"logic": "명확함", "structure": "간결함", "specificity": "보통"}, "vocal": {"volume": "적절함", "pace": "보통", "pauses": "없음", "intonation": "평이함"}, "visual": {"eye_contact": "적절함", "posture": "바름", "expression": "진지함", "gesture_over_time": "없음"}, "key_observations": ["전반적으로 안정적인 답변 태도를 보임", "말의 속도가 일정하고 명확함", "시선 처리가 안정적임"]}
 ```
