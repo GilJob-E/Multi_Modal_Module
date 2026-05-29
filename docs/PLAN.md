@@ -1,5 +1,9 @@
 # 재정의: 실시간 턴 단위 native 멀티모달 면접 평가 모듈
 
+> **(2026-05-24 디렉토리 정리)** 아래 본문의 옛 경로는 *이력 기록*이다. 실제 위치:
+> 스파이크 스크립트 `tools/spike_*.py` → **`legacy/spikes/`**, 과거 증거 `.sisyphus/evidence/spike-*.json`·`phase3-prefill-effect.json` → **`legacy/evidence/`**(인덱스 `legacy/README.md`).
+> `tools/turn_pipeline_demo.py`(Phase 3 하니스)는 **삭제됨**(폐기된 periodic-prefill 데모). 현역 코드는 `src/local_infer/`, 현재 증거는 `.sisyphus/evidence/{m2-window-eval,m5-e2e}.json`.
+
 ## Context (왜 이 작업을 하는가)
 
 `local-infer`는 원래 "실시간 화상 입력 → 텍스트 응답을 최소지연 스트리밍하는 로컬 추론 모듈"로 시작했지만, 진행 중 **native audio "no-go" 검증과 그에 딸린 방어적 disclaimer 문서·3중 경로(native override / degraded fallback)** 로 흐름이 지저분해졌다. 사용자는 결과물이 마음에 안 들어 "핵심만 남기고 재시작"하기로 했다.

@@ -72,19 +72,21 @@ D7이 "다중이미지 frame-dump는 시간축 binding이 깨진다"고 결론�
 - **D7 정밀화**: 시각 트랙 기본을 "holistic frame-dump"에서 **`video_url`+`audio_url`(시간축 binding 획득)**로 격상. 프레임별+집계 fallback은 여전히 강등 유지.
 - **열린 항목**: 16초 윈도우 경계에서 잘린 제스처 처리, 윈도우 집계 프롬프트 설계, 라이브 캡처/VAD 연동.
 
+> **(2026-05-24 정리)** 아래 표의 스파이크 스크립트는 `legacy/spikes/`로, D5–D8 증거 JSON(`spike-*.json`, `phase3-prefill-effect.json`)은 `legacy/evidence/`로 이동했다. 인덱스 `legacy/README.md`. (현재 모듈 증거 `m2-window-eval`·`m5-e2e`는 `.sisyphus/evidence/`.)
+
 ## 신규 코드 (Phase 1 산출물)
 
 | 경로 | 용도 |
 |---|---|
 | `src/local_infer/native_audio.py` | 베이스라인 복구 + `to_content_part` audio_url 교정 |
-| `tools/spike_e4b_native_av.py` | 스파이크 probe (스모크 + 풀 배터리) |
+| `legacy/spikes/spike_e4b_native_av.py` | 스파이크 probe (스모크 + 풀 배터리) |
 | `sglang/launch-configs/vllm_e4b_audio.sh` + `Dockerfile.e4b-audio` | E4B+audio 서빙 (image:16,audio:4) |
-| `tools/spike_cold_prefill.py` | D6 cold kill-test (오디오 cold 바닥 + confirm) |
-| `tools/spike_visual_fingers.py` | D7 다중이미지 binding 한계 진단 |
-| `tools/spike_visual_temporal_v2.py` | D7 프레임별+집계 아키텍처 검증 |
-| `tools/spike_visual_aggregator.py` | D7 smart 집계기 검증(naive 집계 echo 한계 + 시선/고개 GT 부재) |
-| `tools/spike_native_video.py` | D8 video_url 시간축 binding kill-test (손가락 GT, 시간순 시퀀스+질적 묘사) |
-| `tools/spike_video_audio.py` | D8 video_url 단독 → 오디오 native 로드 여부("NO AUDIO" 판정) |
+| `legacy/spikes/spike_cold_prefill.py` | D6 cold kill-test (오디오 cold 바닥 + confirm) |
+| `legacy/spikes/spike_visual_fingers.py` | D7 다중이미지 binding 한계 진단 |
+| `legacy/spikes/spike_visual_temporal_v2.py` | D7 프레임별+집계 아키텍처 검증 |
+| `legacy/spikes/spike_visual_aggregator.py` | D7 smart 집계기 검증(naive 집계 echo 한계 + 시선/고개 GT 부재) |
+| `legacy/spikes/spike_native_video.py` | D8 video_url 시간축 binding kill-test (손가락 GT, 시간순 시퀀스+질적 묘사) |
+| `legacy/spikes/spike_video_audio.py` | D8 video_url 단독 → 오디오 native 로드 여부("NO AUDIO" 판정) |
 
 ## D4. GPU 위생 규칙
 

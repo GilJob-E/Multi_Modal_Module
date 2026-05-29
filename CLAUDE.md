@@ -27,6 +27,20 @@
 - `vid_0033.mp4`는 Phase 1 fixture, gitignore라 git에 없으니 **삭제 금지**(소실 시 복구 불가).
 - **GPU 위생**: 모델 미사용 시 컨테이너 stop + `nvidia-smi`로 VRAM 해제 확인.
 
+## 디렉토리 구조 (2026-05-24 정리)
+
+```
+src/local_infer/   현역 모듈 — service(FastAPI 진입점)·turn_pipeline·native_eval(WindowEvaluator)
+                   ·window_assembly·signals·vllm_client·vllm_stream + clip_stream(테스트/시뮬 입력)
+                   ·native_audio(런타임 미사용, 아카이브 스파이크만 의존 — 잔존)
+tests/             모듈 테스트 5종 (GPU 불필요 3: window_assembly·turn_pipeline·service / 서버 필요 2: window_eval·e2e)
+sglang/launch-configs/  E4B+video:1 서빙 (vllm_e4b_audio.sh + Dockerfile.e4b-audio)
+docs/              README/PLAN/DECISIONS/RESEARCH + OPEN-DECISIONS(보류 결정) + VID-ANALYSIS-RESULTS(실측 원본)
+.sisyphus/         loop-report.md + evidence/{m2-window-eval,m5-e2e}.json (현재 모듈 증거)
+legacy/            아카이브 — spikes/(실험 스크립트 7) + evidence/(과거 증거 9). 인덱스 legacy/README.md. 런타임 무관.
+```
+루트의 `vid_*.mp4`(gitignore 픽스처, 경로 하드코딩·**소실 금지**), `*.docx`(보고서)는 코드 아님.
+
 ## 2. Context management
 
 Context that lives only in one chat is lost the moment the session ends. Persist
