@@ -12,31 +12,39 @@
 - **청각적(Vocal)**: 톤·억양 단조로움·발음·말 속도·pause·자신감
 - **시각적(Visual)**: 시선 처리·표정·제스처·화면 구도·조명
 
-핵심 방법론은 **periodic prefill**: 발화 중 들어오는 프레임/오디오를 미리 prefill해, 턴 종료(VAD/end-of-turn) 시점에 첫 토큰 지연을 최소화한다.
+**처리 전략 (모달리티별, 2026-05-24 실측으로 재정의).** 한때 간판으로 삼았던 *periodic prefill*은 ≤30s·E4B에서 **불필요**함이 드러났다 — 오디오 인코더가 클립을 소수 토큰으로 압축해 **cold prefill이 이미 싸기** 때문(신선 콘텐츠 30s end-to-end <0.2s). 대신 모달리티 특성에 맞춘다:
+
+- **청각/언어 (audio)**: ≤30s 윈도우를 모델에 통째로 준다. latency는 모델 속성으로 충족되고, 유일한 비용은 부팅 1회성 워밍업(기동 시 더미 요청으로 선warm).
+- **시각 (visual)**: **holistic native 평가** — 프레임 몇 장 + 오디오를 한 프롬프트에 줘 모델이 시선·태도·제스처를 통째로 *질적*으로 평가한다(north-star: 저수준 feature dump 지양). deliverable이 "풍부한 질적 피드백"이므로 이 holistic 경로가 기본이다. *(프레임별 단일분석 + 집계는 정밀 시간추적이 하드 요구일 때만의 narrow fallback — 다중이미지에서 미세 시퀀스 binding이 깨지는 한계를 우회하지만, 그 자체가 feature-extraction-adjacent라 native 원칙과 긴장. 상세 `docs/DECISIONS.md` D7.)*
 
 비목표: TTS, 프론트엔드, 터널/노출, GilJob 통합 코드, Gemini Live.
 
 ## 성공 기준
 
 1. 출력 품질이 위 verbal/vocal/visual 종합 평가 수준에 도달.
-2. 턴 종료 시 warm TTFT < 0.5s (periodic prefill로 달성).
+2. 턴 종료 시 first-token < 0.5s. 오디오는 cold로 이미 충족(30s ~0.12s), 시각 holistic도 프레임 몇 장이라 cold로 충족.
 3. 청각·시각을 가능한 한 모델이 native로 이해.
 4. vLLM을 숨긴 깔끔한 단일 인터페이스, 모델/엔진 교체에도 인터페이스 불변.
 
 ## 현재 상태
 
-**Phase 1 검증 스파이크 완료(2026-05-24) → 아키텍처 (1) 단일 E4B native AV 확정.**
-`audio_url`(data URL) 규격 + `vllm[audio]` 파생 이미지로 E4B가 native AV를 HTTP 200
-처리, prosody 묘사·평가 깊이·prefix 캐시 재사용 모두 실측 통과(증거
-`.sisyphus/evidence/spike-e4b-native-av.json`). 이전 audio "no-go"는 모델 천장이
-아니라 payload 버그였음 확인. 검증된 전송 = 샘플 프레임(`image_url`) + `audio_url`.
+**아키텍처 (1) 단일 E4B native AV 확정(Phase 1)** + **처리 전략 실측 확정(cold kill-test +
+시각 시간축 스파이크, 2026-05-24).**
 
-**Phase 3**(턴 파이프라인 + periodic prefill)에서 평가자 인터페이스·품질·nativeness는
-구현·확인됐으나, **간판 방법론인 periodic prefill의 latency 실효는 미입증이다.** 최초
-"31.5배 단축"은 하니스가 최종 오디오를 미리 쥔 best-case 측정이었고(정정됨), 라이브에선
-최종 오디오가 턴 종료 시점에야 확정돼 미리 데울 수 없다. 다음 단계는 이 갭을 cold
-조건에서 검증하는 **cold kill-test 스파이크**(`docs/PLAN.md` "## 남은 갭"). Phase 2는
-폐지·흡수, Phase 4는 백지화됨.
+- **청각/언어**: `audio_url`(data URL) + `vllm[audio]` 파생 이미지로 E4B가 native AV를
+  HTTP 200 처리, prosody 묘사·평가 깊이 충분. **cold prefill이 싸다** — 신선 콘텐츠
+  30s end-to-end <0.2s, latency 목표를 periodic prefill 없이 충족(증거
+  `spike-cold-prefill.json`). 최초 "31.5배"는 best-case 오측이라 철회됨.
+- **시각**: 방향을 **holistic native 평가로 확정**(problem-solver 재프레이밍). 손가락
+  카운팅 프로브로 "다중이미지 binding 깨짐 → 프레임별+집계"를 팠으나, 그건 (a) north-star가
+  금한 저수준 feature extraction의 LLM 버전이고 (b) goal이 요구 안 하는 정밀 추적이며
+  (c) "정밀-프로브 실패 ≠ holistic 부적합"인데 혼동한 것. 프레임별+집계는 narrow fallback으로
+  강등(다중이미지 binding 한계는 보존 지식; 증거 `spike-visual-*.json`).
+- Phase 2 폐지·흡수, Phase 3 부분완료(인터페이스·품질·nativeness), Phase 4 백지화.
+
+**다음**: 실제 면접 클립에 holistic native AV 평가(프레임 3~5장 + 오디오 한 프롬프트)를
+돌려 **시선/고개/태도 + verbal/vocal 피드백을 루브릭으로 채점** — deliverable 자체를 검증.
+상세 `docs/PLAN.md`.
 
 ## 디렉터리
 

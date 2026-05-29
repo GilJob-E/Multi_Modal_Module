@@ -1,0 +1,36 @@
+{
+  "model": "google/gemma-4-E4B-it",
+  "transport": "video_url(data URL)",
+  "clip": "video.mp4",
+  "duration_s": 37.16,
+  "gt_fingers": [
+    5,
+    2,
+    10,
+    9,
+    4,
+    2,
+    1,
+    4,
+    5,
+    10
+  ],
+  "multi_image_baseline": {
+    "4프레임": "0, 5, 2, 0",
+    "10프레임": "0, 0, 1, 2, 3, 4, 5"
+  },
+  "results": {
+    "sequence": {
+      "status": 200,
+      "ttft_s": 2.0284504320006818,
+      "total_s": 2.9463813500478864,
+      "output": "0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0"
+    },
+    "temporal_qualitative": {
+      "status": 200,
+      "ttft_s": 0.12541467393748462,
+      "total_s": 5.523633842007257,
+      "output": "The hand gestures in the video evolve through several distinct phases:\n\n1.  **Beginning (00:00 - 00:10):** The video starts with the speaker with no visible hand gestures, maintaining a neutral posture.\n2.  **First Gesture (00:13):** The speaker raises one hand, displaying a **\"stop\" or \"high five\" gesture** with the palm facing forward.\n3.  **Second Gesture (00:14):** The speaker changes the gesture to hold up **two fingers** (index and middle finger) on one hand.\n4.  **Third Gesture (00:15):** The speaker holds up **two fingers** on both hands, one on each side.\n5.  **Fourth Gesture (00:16 - 00:17):** The speaker raises both hands, displaying **five fingers** on each hand (a full open palm gesture).\n6.  **Fifth Gesture (00:19 - 00:20):** The speaker continues with both hands raised, displaying **five fingers** on each hand.\n7.  **Sixth Gesture (00:21 - 00:22):** The speaker holds up **two fingers** on each hand again.\n8.  **Seventh Gesture (00:23 - 00:25):** The speaker holds up **two fingers** on each hand, similar to the previous instances.\n9.  **Eighth Gesture (00:26 - 00:27):** The speaker holds up **one finger** on each hand.\n10. **Ninth Gesture (00:28 - 00:31):** The speaker raises both hands, displaying **five fingers** on each hand again.\n11. **Tenth Gesture (00:32 - 00:33):** The speaker maintains both hands raised, displaying **five fingers** on each hand.\n12. **End (00:34 - 00:37):** The speaker returns to a neutral posture with no visible hand gestures."
+    }
+  }
+}

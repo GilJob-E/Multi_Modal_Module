@@ -1,0 +1,14 @@
+{
+  "model": "google/gemma-4-E4B-it",
+  "transport": "video_url(data URL) ONLY — no separate audio_url",
+  "clip": "vid_0001 0-28s, 16kHz mono",
+  "audio_native_loaded": false,
+  "results": {
+    "transcribe": {
+      "status": 200,
+      "ttft_s": 0.6482775290496647,
+      "total_s": 0.6711051780730486,
+      "output": "NO AUDIO"
+    }
+  }
+}
