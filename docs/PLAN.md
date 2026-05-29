@@ -2,7 +2,7 @@
 
 > **(2026-05-24 디렉토리 정리)** 아래 본문의 옛 경로는 *이력 기록*이다. 실제 위치:
 > 스파이크 스크립트 `tools/spike_*.py` → **`legacy/spikes/`**, 과거 증거 `.sisyphus/evidence/spike-*.json`·`phase3-prefill-effect.json` → **`legacy/evidence/`**(인덱스 `legacy/README.md`).
-> `tools/turn_pipeline_demo.py`(Phase 3 하니스)는 **삭제됨**(폐기된 periodic-prefill 데모). 현역 코드는 `src/local_infer/`, 현재 증거는 `.sisyphus/evidence/{m2-window-eval,m5-e2e}.json`.
+> `tools/turn_pipeline_demo.py`(Phase 3 하니스)는 **삭제됨**(폐기된 periodic-prefill 데모). 서빙 설정 `sglang/launch-configs/` → **`serving/`**(폴더명 sglang은 vLLM 채택 후 stale였음). 현역 코드는 `src/local_infer/`, 현재 증거는 `.sisyphus/evidence/{m2-window-eval,m5-e2e}.json`.
 
 ## Context (왜 이 작업을 하는가)
 
@@ -270,7 +270,7 @@ gje = **사이드카 HTTP 서비스**(Worker가 호출). vLLM은 서비스 뒤�
 
 | 파일 | 작업 |
 |---|---|
-| `sglang/launch-configs/vllm_e4b_audio.sh` | 신규 — E4B+audio 서빙 |
+| `serving/vllm_e4b_audio.sh` | 신규 — E4B+audio 서빙 |
 | `tools/spike_e4b_native_av.py` | 신규 — Phase1 스파이크(기존 probe 적응) |
 | `src/local_infer/native_payloads.py` | 교정 — `input_audio`→`audio_url` |
 | `src/local_infer/native_audio.py` | 30초 클리핑 추가 |

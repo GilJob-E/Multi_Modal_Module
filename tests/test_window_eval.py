@@ -2,7 +2,7 @@
 """WindowEvaluator 통합 테스트 — 실제 클립 윈도우로 두 채널 신호 산출 (서버 필요).
 
 실행: PYTHONPATH=src python3 tests/test_window_eval.py
-서버: bash sglang/launch-configs/vllm_e4b_audio.sh (E4B + video:1)
+서버: bash serving/vllm_e4b_audio.sh (E4B + video:1)
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def main() -> int:
     try:
         client.health()
     except Exception as e:  # noqa: BLE001
-        print(f"✗ 서버 미기동: {e}\n  bash sglang/launch-configs/vllm_e4b_audio.sh 후 재시도")
+        print(f"✗ 서버 미기동: {e}\n  bash serving/vllm_e4b_audio.sh 후 재시도")
         return 1
 
     ev = WindowEvaluator(client=client)

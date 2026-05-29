@@ -80,7 +80,7 @@ D7이 "다중이미지 frame-dump는 시간축 binding이 깨진다"고 결론�
 |---|---|
 | `src/local_infer/native_audio.py` | 베이스라인 복구 + `to_content_part` audio_url 교정 |
 | `legacy/spikes/spike_e4b_native_av.py` | 스파이크 probe (스모크 + 풀 배터리) |
-| `sglang/launch-configs/vllm_e4b_audio.sh` + `Dockerfile.e4b-audio` | E4B+audio 서빙 (image:16,audio:4) |
+| `serving/vllm_e4b_audio.sh` + `Dockerfile.e4b-audio` | E4B+audio 서빙 (image:16,audio:4,video:1) |
 | `legacy/spikes/spike_cold_prefill.py` | D6 cold kill-test (오디오 cold 바닥 + confirm) |
 | `legacy/spikes/spike_visual_fingers.py` | D7 다중이미지 binding 한계 진단 |
 | `legacy/spikes/spike_visual_temporal_v2.py` | D7 프레임별+집계 아키텍처 검증 |

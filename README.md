@@ -50,14 +50,61 @@
 
 ```text
 gje/
-├── README.md          # 이 문서 (프로젝트 프레임)
-├── CLAUDE.md          # Claude Code용 작업 가이드
-├── docs/
-│   ├── PLAN.md        # 재정의 실행 계획 (Phase 1~4)
-│   ├── RESEARCH.md    # Gemma 4 바리언트·native 오디오 리서치 결론 + 출처
-│   └── DECISIONS.md   # 엔진/모델/벤치 결정과 근거, 재사용 코드 포인터
-├── vid_0033.mp4       # 실제 면접 fixture (gitignore, 디스크에만 존재)
-└── 졸업작품2_중간보고_3분반_1조 (2).docx   # 중간보고서 (레퍼런스)
+├── README.md  CLAUDE.md  pyproject.toml
+├── src/local_infer/   # 런타임 모듈: service(FastAPI)·turn_pipeline·native_eval(WindowEvaluator)
+│                      #   ·window_assembly·signals·vllm_client·vllm_stream·clip_stream
+│                      #   (native_audio: 런타임 미사용, 아카이브 스파이크 의존으로 잔존)
+├── tests/             # 테스트 5 (GPU 불필요 3 + 서버 필요 2)
+├── serving/           # E4B+video:1 서빙 (vllm_e4b_audio.sh + Dockerfile.e4b-audio)
+├── docs/              # PLAN · DECISIONS · RESEARCH · OPEN-DECISIONS · VID-ANALYSIS-RESULTS
+├── .sisyphus/         # loop-report + evidence/(m2-window-eval, m5-e2e)  ← 현재 증거
+├── legacy/            # 아카이브: spikes/(실험 7) + evidence/(과거 9). 런타임 무관 (legacy/README.md)
+├── vid_0001/0033.mp4, video.mp4   # fixtures (gitignore, 디스크에만 — 소실 금지)
+└── 졸업작품2_중간보고_3분반_1조 (2).docx   # 중간보고서
+```
+
+## VID-ANALYSIS-RESULTS.md 산출 의존관계
+
+`docs/VID-ANALYSIS-RESULTS.md`(실제 면접 클립의 윈도우별 신호 원본)는 아래 의존으로 도출된다.
+재현: 서버 기동(`serving/vllm_e4b_audio.sh`) 후 `PYTHONPATH=src .venv/bin/python tests/test_e2e_pipeline.py`
+→ `.sisyphus/evidence/m5-e2e.json` 갱신 → json→markdown 스니펫이 문서 재생성.
+
+```mermaid
+flowchart TD
+    vid["vid_0001 / vid_0033.mp4<br/>(fixtures, gitignore)"]
+    venv(["uv .venv<br/>fastapi·uvicorn·requests"])
+    runner["tests/test_e2e_pipeline.py<br/>(시뮬 라이브 턴 구동)"]
+    clip["clip_stream.py<br/>extract_frames / extract_pcm"]
+    pipe["turn_pipeline.py<br/>SlidingWindowPipeline"]
+    evalr["native_eval.py<br/>WindowEvaluator"]
+    wasm["window_assembly.py<br/>(1fps→mp4 / PCM→wav)"]
+    sig["signals.py"]
+    vc["vllm_client.py"]
+    vs["vllm_stream.py"]
+    ffmpeg(["ffmpeg (system bin)"])
+    serve["serving/vllm_e4b_audio.sh<br/>+ Dockerfile.e4b-audio"]
+    vllm[("vLLM Gemma4 E4B<br/>:8000 (GPU)")]
+    ev[".sisyphus/evidence/<br/>m5-e2e.json"]
+    gen["json→markdown 스니펫"]
+    doc["docs/VID-ANALYSIS-RESULTS.md"]
+
+    vid --> runner
+    venv -.-> runner
+    runner --> clip
+    runner --> pipe
+    clip --> ffmpeg
+    pipe --> sig
+    pipe --> evalr
+    evalr --> wasm
+    evalr --> vc
+    evalr --> sig
+    wasm --> ffmpeg
+    vc --> vs
+    vc -->|HTTP| vllm
+    serve -.기동.-> vllm
+    runner --> ev
+    ev --> gen
+    gen --> doc
 ```
 
 ## 외부 의존
