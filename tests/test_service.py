@@ -15,6 +15,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from local_infer.service import create_app  # noqa: E402
 from local_infer.signals import EvaluationSignal, NonVerbalSignal  # noqa: E402
+from local_infer.turn_pipeline import InlineExecutor  # noqa: E402
 
 
 class FakeEvaluator:
@@ -27,11 +28,11 @@ class FakeEvaluator:
         assert all(isinstance(f, bytes) for f in frames), "프레임 base64 디코드 실패"
         return NonVerbalSignal(t=t, window_s=window_s, state="engaged", intensity=0.6, note="n")
 
-    def evaluate_window(self, frames, pcm, *, window_start_s, window_dur_s, src_fps=1.0, sample_rate=16000):
+    def evaluate_window(self, frames, pcm, *, window_start_s, window_dur_s, src_fps=1.0, sample_rate=16000, compact=False):
         self.ev += 1
         assert isinstance(pcm, bytes) and pcm, "pcm base64 디코드 실패"
         return EvaluationSignal(window_start_s=window_start_s, window_dur_s=window_dur_s,
-                                verbal={"logic": "ok"}, vocal={}, visual={}, key_observations=["x"])
+                                verbal={"logic": "ok"}, vocal={}, visual={}, key_observations=["x"], compact=compact)
 
 
 def _b64(b: bytes) -> str:
@@ -40,7 +41,8 @@ def _b64(b: bytes) -> str:
 
 def test_full_turn_flow():
     fake = FakeEvaluator()
-    client = TestClient(create_app(evaluator=fake, nonverbal_window_s=3.0, eval_window_s=16.0))
+    client = TestClient(create_app(evaluator=fake, executor=InlineExecutor(),
+                                   nonverbal_window_s=3.0, eval_window_s=16.0))
 
     assert client.get("/health").json()["ok"] is True
     sid = "turn1"

@@ -39,6 +39,7 @@ class EvaluationSignal:
     visual: dict = field(default_factory=dict)  # {eye_contact, posture, expression, gesture_over_time, ...}
     critique: list[str] = field(default_factory=list)  # 면접관으로서 걸리는 약점·우려(강제)
     key_observations: list[str] = field(default_factory=list)
+    compact: bool = False  # end-of-turn tail(짧은 출력)이면 True — 발화중 풀 비평과 구분
 
     def to_dict(self) -> dict:
         return asdict(self)

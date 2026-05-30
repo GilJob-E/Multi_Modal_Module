@@ -41,6 +41,17 @@ EVAL_SYSTEM = (
     '"key_observations": [str, ...]. 각 leaf는 한국어 짧은 비평.'
 )
 
+# end-of-turn tail용 — 답변 *마지막 구간*만 아주 짧게. 출력 토큰이 지연의 지배 비용이라
+# (생성 ~90 tok/s), 다음질문 steering에 필요한 최소 2키만 내 turn 종료 지연을 묶는다.
+# (5키 중첩 스키마는 160토큰에서 잘려 JSON이 깨졌음 — 실측, 2026-05-30.)
+EVAL_TAIL_SYSTEM = (
+    "당신은 까다로운 면접관입니다. 지원자 답변의 **마지막 구간**(영상+음성)을 빠르게 보고, "
+    "다음 질문을 정하는 데 필요한 핵심만 아주 짧게 내세요. 절대 길게 쓰지 말 것. "
+    "오직 SINGLE JSON object로만, 키 2개만: "
+    '{"summary": "이 구간 한 줄 요약(한국어, 한 문장)", '
+    '"critique": ["가장 걸리는 약점 1~2개, 한국어 짧게"]}'
+)
+
 
 def _video_part(url: str) -> dict:
     return {"type": "video_url", "video_url": {"url": url}}
@@ -50,8 +61,46 @@ def _audio_part(url: str) -> dict:
     return {"type": "audio_url", "audio_url": {"url": url}}
 
 
+def _repair_truncated_json(text: str) -> dict | None:
+    """max_tokens로 잘린 JSON object 복구 — 열린 문자열/괄호를 균형 맞춰 닫고 파싱 시도.
+    실패하면 None. (compact tail이 토큰 상한에 닿아도 부분 신호라도 건지기 위한 방어선.)"""
+    start = text.find("{")
+    if start < 0:
+        return None
+    stack: list[str] = []
+    in_str = False
+    esc = False
+    for ch in text[start:]:
+        if esc:
+            esc = False
+            continue
+        if in_str:
+            if ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch in "{[":
+            stack.append("}" if ch == "{" else "]")
+        elif ch in "}]" and stack:
+            stack.pop()
+    frag = text[start:]
+    if in_str:
+        frag += '"'                      # 열린 문자열 닫기
+    frag = frag.rstrip().rstrip(",")     # 끝의 불완전 쉼표 제거
+    if re.search(r":\s*$", frag):
+        frag += " null"                  # "key": 만 있고 값 없이 끊긴 경우
+    frag += "".join(reversed(stack))     # 남은 열린 괄호 역순으로 닫기
+    try:
+        return json.loads(frag)
+    except json.JSONDecodeError:
+        return None
+
+
 def _extract_json(text: str) -> dict:
-    """모델 출력에서 첫 JSON object를 파싱. 실패 시 ValueError."""
+    """모델 출력에서 첫 JSON object를 파싱. 잘린 출력은 복구 시도. 실패 시 ValueError."""
     text = text.strip()
     # ```json ... ``` 펜스 제거
     text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.MULTILINE).strip()
@@ -61,7 +110,13 @@ def _extract_json(text: str) -> dict:
         pass
     m = re.search(r"\{.*\}", text, flags=re.DOTALL)
     if m:
-        return json.loads(m.group(0))
+        try:
+            return json.loads(m.group(0))
+        except json.JSONDecodeError:
+            pass
+    repaired = _repair_truncated_json(text)  # max_tokens로 잘린 JSON 복구 시도
+    if repaired is not None:
+        return repaired
     raise ValueError(f"no JSON object in output: {text[:200]!r}")
 
 
@@ -71,9 +126,20 @@ class WindowEvaluator:
     집계는 하지 않는다(Gemini 몫) — 두 메서드 모두 *한 윈도우*의 신호만 낸다.
     """
 
-    def __init__(self, *, client: VllmClient | None = None, model: str = MODEL) -> None:
+    def __init__(
+        self,
+        *,
+        client: VllmClient | None = None,
+        model: str = MODEL,
+        eval_max_tokens: int = 640,
+        tail_max_tokens: int = 160,
+        nonverbal_max_tokens: int = 96,
+    ) -> None:
         self.client = client or default_vllm_client()
         self.model = model
+        self.eval_max_tokens = eval_max_tokens      # 발화중 풀 비평(채널②)
+        self.tail_max_tokens = tail_max_tokens      # end-of-turn compact tail (≤2.5s 목표 레버)
+        self.nonverbal_max_tokens = nonverbal_max_tokens  # 채널① 비언어 read
 
     def _ask_json(self, *, system: str, content: list[dict], max_tokens: int) -> dict:
         resp = self.client.chat(
@@ -88,6 +154,20 @@ class WindowEvaluator:
             }
         )
         return _extract_json(resp["choices"][0]["message"]["content"])
+
+    def warmup(self) -> None:
+        """기동 1회 더미 요청으로 모델/CUDA 그래프 선warm (best-effort, 실패 무시).
+        첫 턴의 부팅 비용(CUDA 그래프 컴파일 ~1.2s, D6)을 사용자 턴 밖으로 뺀다.
+        주: 텍스트 경로만 데움 — 멀티모달 그래프 완전 선warm엔 합성 클립이 필요(미포함)."""
+        try:
+            self.client.chat({
+                "model": self.model,
+                "messages": [{"role": "user", "content": "warmup"}],
+                "max_tokens": 1,
+                "temperature": 0.0,
+            })
+        except Exception:  # noqa: BLE001 - 선warm 실패는 치명적이지 않음
+            pass
 
     def read_nonverbal(
         self,
@@ -104,7 +184,7 @@ class WindowEvaluator:
         if pcm:
             content.append(_audio_part(assemble_audio_url(pcm, sample_rate=sample_rate)))
         content.append({"type": "text", "text": "Read the candidate's non-verbal state now."})
-        data = self._ask_json(system=NONVERBAL_SYSTEM, content=content, max_tokens=96)
+        data = self._ask_json(system=NONVERBAL_SYSTEM, content=content, max_tokens=self.nonverbal_max_tokens)
         state = str(data.get("state", "neutral")).strip().lower()
         if state not in NONVERBAL_STATES:
             state = "neutral"
@@ -126,14 +206,28 @@ class WindowEvaluator:
         window_dur_s: float,
         src_fps: float = 1.0,
         sample_rate: int = 16000,
+        compact: bool = False,
     ) -> EvaluationSignal:
-        """채널 ② — 16초 윈도우 verbal/vocal/visual 비평."""
+        """채널 ② — verbal/vocal/visual 비평. compact=True면 답변 *마지막 구간*을 짧은 출력으로
+        비평(터너 토큰을 줄여 end-of-turn 지연을 ≤목표로 — 생성 토큰이 지배 비용)."""
+        system = EVAL_TAIL_SYSTEM if compact else EVAL_SYSTEM
+        max_tokens = self.tail_max_tokens if compact else self.eval_max_tokens
+        prompt = "Critique the final part of this answer." if compact else "Evaluate this answer window."
         content = [
             _video_part(assemble_video_url(jpeg_frames, src_fps=src_fps)),
             _audio_part(assemble_audio_url(pcm, sample_rate=sample_rate)),
-            {"type": "text", "text": "Evaluate this answer window."},
+            {"type": "text", "text": prompt},
         ]
-        data = self._ask_json(system=EVAL_SYSTEM, content=content, max_tokens=640)
+        data = self._ask_json(system=system, content=content, max_tokens=max_tokens)
+        if compact:  # 2키(summary/critique) 최소 스키마 → key_observations[0]=summary + critique
+            summary = str(data.get("summary", "")).strip()
+            return EvaluationSignal(
+                window_start_s=window_start_s,
+                window_dur_s=window_dur_s,
+                critique=[str(x) for x in data.get("critique", [])][:2],
+                key_observations=[summary] if summary else [],
+                compact=True,
+            )
         return EvaluationSignal(
             window_start_s=window_start_s,
             window_dur_s=window_dur_s,

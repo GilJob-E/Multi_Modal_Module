@@ -33,7 +33,7 @@
 src/local_infer/   현역 모듈 — service(FastAPI 진입점)·turn_pipeline·native_eval(WindowEvaluator)
                    ·window_assembly·signals·vllm_client·vllm_stream + clip_stream(테스트/시뮬 입력)
                    ·native_audio(런타임 미사용, 아카이브 스파이크만 의존 — 잔존)
-tests/             모듈 테스트 5종 (GPU 불필요 3: window_assembly·turn_pipeline·service / 서버 필요 2: window_eval·e2e)
+tests/             모듈 테스트 6종 (GPU 불필요 4: window_assembly·turn_pipeline·service·native_eval_parse / 서버 필요 2: window_eval·e2e)
 serving/           E4B+video:1 서빙 (vllm_e4b_audio.sh + Dockerfile.e4b-audio)
 docs/              README/PLAN/DECISIONS/RESEARCH + OPEN-DECISIONS(보류 결정) + VID-ANALYSIS-RESULTS(실측 원본)
 .sisyphus/         loop-report.md + evidence/{m2-window-eval,m5-e2e}.json (현재 모듈 증거)

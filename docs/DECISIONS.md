@@ -74,6 +74,34 @@ D7이 "다중이미지 frame-dump는 시간축 binding이 깨진다"고 결론�
 
 > **(2026-05-24 정리)** 아래 표의 스파이크 스크립트는 `legacy/spikes/`로, D5–D8 증거 JSON(`spike-*.json`, `phase3-prefill-effect.json`)은 `legacy/evidence/`로 이동했다. 인덱스 `legacy/README.md`. (현재 모듈 증거 `m2-window-eval`·`m5-e2e`는 `.sisyphus/evidence/`.)
 
+## D9. 백그라운드 3-레인 파이프라인 + end-of-turn compact tail (확정·구현, 2026-05-30)
+
+**문제(사용자 제기):** end-of-turn 확정 지연이 다음 질문 즉시 반영의 임계 경로. 비평 프롬프트
+도입 후 동기 풀-eval 방식은 vid_0001 **8.01s**까지 튐(`m5-e2e.json`, 생성 토큰이 지배 비용
+~90 tok/s). 또 평가 추론이 `/media` 핸들러 안에서 **동기 블로킹**이라 16s 경계마다 ~7s 멈춰
+채널①(아바타 backchannel)이 끊김. **성공기준 = 체감 레이턴시, eot ≤2.5s, 즉시 반영**(사용자 확정).
+
+**1차 원리:** eot 지연의 지배 비용은 **출력 생성 토큰**(prefill/디코드는 ~0.8s로 쌈). ⇒ 2.5s는
+출력을 ~100–160토큰으로 줄여야 강제 충족. 발화 중 풀 평가는 latency-critical 아님(백그라운드면).
+
+**결정:**
+- **세 실행 레인**(`turn_pipeline.py`): 빠른(비언어)·느린(풀 평가)·tail(compact 전용, 워커 1).
+  채널②가 채널①을 절대 막지 않음 — 실-스레드 테스트로 입증(평가 1.0s 도는 중 비언어 0ms).
+- **end_turn = compact tail만**: 답변 마지막 구간을 `EVAL_TAIL_SYSTEM`(터스)+`tail_max_tokens=160`
+  로 1회 평가, 전용 레인에 올려 즉시 실행. 발화 중 완성된 풀 윈도우는 이미 emit, end_turn은
+  그것들을 안 기다림. tail은 `_eval_covered_until`(연속-성공 prefix)~now를 커버해 미평가/실패/
+  in-flight 구간을 항상 재커버(assemble 캡이 16프레임/30s로 슬라이드). 짧은 답변(<16s)은 전체 1회.
+- **race-free**: poll이 카운터를 *제출 시점*에 lock 하에 전진(동시 poll 중복 방지) — 입증.
+- **앱-레벨 공유 실행기**(`service.py`): 세션마다 안 만듦(스레드 누수 제거). 단일 면접 전제.
+- **견고성**: 워커 예외는 로깅·삼킴(silent drop 방지), `_closed` 가드로 close 후 emit no-op,
+  신호는 완료순(소비자가 타임스탬프로 정렬).
+
+**실측 완료(2026-05-30, E4B 서버):** eot 확정 지연 **vid_0001 0.87s / vid_0033 0.72s ≤2.5s ✓**,
+compact tail이 유효 신호(summary+critique) 산출, 채널① 비언어 0.65s(평가에 안 막힘). **함정 교정**:
+5키 중첩 tail 스키마는 160토큰에서 잘려 JSON 깨짐(tail 0개) → **2키(summary/critique) 최소 스키마
++ 잘린-JSON 복구**(`_repair_truncated_json`)로 교정. 증거 `m5-e2e.json`. 코드·동시성 GPU-free
+7테스트(파서 포함), 적대적 리뷰 2라운드(25+2 에이전트) 통과.
+
 ## 신규 코드 (Phase 1 산출물)
 
 | 경로 | 용도 |
